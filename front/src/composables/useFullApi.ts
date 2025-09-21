@@ -1,0 +1,158 @@
+// src/composables/getListData.ts
+import { computed, type Ref, type ComputedRef, ref } from 'vue'
+import { useApi } from '@/composables/useApi'
+import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
+import { watchOnce } from "@vueuse/core"
+import { Categories } from '@/composables/useTagApi'
+
+interface Tag {
+  category: Categories
+  value: string
+  quantifier?: string
+}
+
+export interface TagDoc extends Tag {
+  id: number
+  documentId: string
+  createdAt: string
+  publishedAt: string
+}
+
+export interface ListData {
+  documentId: string
+  job_id: string
+  job_title: string
+  job_max_salary: number
+  job_location: string
+  employer_name: string
+  job_posted_at_datetime_utc: string
+  job_is_remote: boolean
+  tags: TagDoc[]
+}
+
+export interface ListDataReturn {
+  data: Ref<ListData[] | null>
+  loading: Ref<boolean>
+  error: Ref<string | null>
+  refetch: (options?: { headers?: Record<string, string> }) => Promise<ListData[] | null>
+  nextPage: () => Promise<boolean>
+  fetchPage: (page: number) => Promise<void>
+  getIndexById: (id: string) => number
+  getRelativeId: (id: string, offset: number) => string | null
+  getNeighbors: (id: string, range?: number) => string[]
+  useSafeNeighborhood: (id: Ref<string>, range?: number) => ComputedRef<string[]>
+}
+
+const pageSize = 150
+export const LIST_DATA_KEY = '/datas'
+const LIST_DATA_OPTIONS: StrapiQueryOptions = {
+  fields: [
+    'job_id',
+    'job_title',
+    'job_min_salary',
+    'job_max_salary',
+    'job_posted_at_datetime_utc',
+    'job_location',
+    'employer_name',
+    'job_is_remote'
+  ],
+  pagination: { page: 1, pageSize },
+  filters: { tags: { $notNull: true } },
+  sort: ['job_posted_at_datetime_utc:desc'],
+  populate: ['tags']
+}
+
+let singleton: ListDataReturn | null = import.meta.hot ? (import.meta.hot.data.listDataSingleton ?? null) : null
+export function listData(authHeaders?: () => Record<string, string>): ListDataReturn {
+  if (singleton) {
+    return singleton
+  }
+
+  const apiStore = useApi()
+  const resource = apiStore.useStrapiResource<ListData>(
+    LIST_DATA_KEY,
+    LIST_DATA_OPTIONS,
+    { defaultHeaders: authHeaders }
+  )
+
+  const { data, meta, loading, error, refetch } = resource.getAll(LIST_DATA_OPTIONS)
+  const mergedData = ref<ListData[] | null>(null)
+
+  watchOnce(data, (val) => {
+    if (val) {
+      mergedData.value = val
+    }
+  })
+
+  async function fetchPage(page: number) {
+    const res = await refetch({ ...LIST_DATA_OPTIONS, pagination: { page, pageSize } })
+    if (res) {
+      if (!mergedData.value) {
+        mergedData.value = res
+      } else {
+        mergedData.value.push(...res)
+      }
+    }
+  }
+
+  async function nextPage() {
+    if (!meta.value) return false
+    const { page, pageCount } = meta.value.pagination
+    const more = page < pageCount
+    if (more) fetchPage(page + 1)
+    return more
+  }
+
+  function getIndexById(id: string) {
+    return mergedData.value?.findIndex(d => d.documentId === id) ?? -1
+  }
+
+  function getRelativeId(id: string, offset: number) {
+    if (!mergedData.value?.length) return null
+    const index = getIndexById(id)
+    const safeIndex = index === -1 ? 0 : index
+    const total = mergedData.value.length
+    const targetIndex = (safeIndex + offset + total) % total
+    return mergedData.value[targetIndex].documentId
+  }
+
+  function getNeighbors(id: string, range = 1) {
+    if (!mergedData.value?.length) return []
+    const neighbors: string[] = []
+    for (let offset = -range; offset <= range; offset++) {
+      if (offset === 0) {
+        neighbors.push(id)
+        continue
+      }
+      const neighborId = getRelativeId(id, offset)
+      if (neighborId) neighbors.push(neighborId)
+    }
+    return neighbors
+  }
+
+  function useSafeNeighborhood(id: Ref<string>, range = 1) {
+    return computed(() => {
+      if (loading.value || !mergedData.value) return []
+      return getNeighbors(id.value, range)
+    })
+  }
+
+  singleton = {
+    data: mergedData,
+    loading,
+    error,
+    refetch,
+    nextPage,
+    fetchPage,
+    getIndexById,
+    getRelativeId,
+    getNeighbors,
+    useSafeNeighborhood,
+  }
+
+  if (import.meta.hot) {
+    import.meta.hot.data.listDataSingleton = singleton
+  }
+
+  return singleton
+}
