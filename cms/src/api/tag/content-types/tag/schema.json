@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tags",
+  "info": {
+    "singularName": "tag",
+    "pluralName": "tags",
+    "displayName": "Tag"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "programming language",
+        "framework",
+        "cloud platform",
+        "database",
+        "devops tool",
+        "testing",
+        "security clearance",
+        "education level",
+        "degree field",
+        "compensation",
+        "benefits",
+        "work arrangement",
+        "employment type",
+        "perks & culture"
+      ]
+    },
+    "value": {
+      "type": "string"
+    },
+    "quantifier": {
+      "type": "enumeration",
+      "enum": [
+        "required",
+        "preferred",
+        "suggested"
+      ]
+    },
+    "datum": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::data.data",
+      "inversedBy": "tags"
+    }
+  }
+}

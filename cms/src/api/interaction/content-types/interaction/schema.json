@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "interactions",
+  "info": {
+    "singularName": "interaction",
+    "pluralName": "interactions",
+    "displayName": "Interaction"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "flavor": {
+      "type": "enumeration",
+      "enum": [
+        "like",
+        "dislike",
+        "seen"
+      ]
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "interactions"
+    },
+    "datum": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::data.data",
+      "inversedBy": "interactions"
+    }
+  }
+}
