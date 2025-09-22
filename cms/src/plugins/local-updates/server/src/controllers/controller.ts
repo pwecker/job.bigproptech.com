@@ -160,7 +160,7 @@ const controller: Core.Controller = {
       let targetUrl: URL;
       try {
         targetUrl = new URL(url as string);
-        const allowedHosts = ['localhost', '127.0.0.1'];
+        const allowedHosts = ['localhost', '127.0.0.1', 'keystone.railway.internal'];
         if (!allowedHosts.includes(targetUrl.hostname)) {
           return ctx.forbidden('URL not allowed');
         }
