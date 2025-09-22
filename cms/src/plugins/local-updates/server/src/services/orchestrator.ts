@@ -103,53 +103,17 @@ class RailwayResource extends BaseResource {
       throw new Error('RAILWAY_SERVICE_URL must be set to your deployed service URL');
     }
 
-    const url = this.baseUrl;    
-    console.log(`Waking up Railway service: ${url}`);
-    
+    const url = this.baseUrl;
+
     try {
-      console.log(`Attempting health check at: ${url}/health`);
-      const response = await axios.get(`${url}/health`, { 
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'Strapi-Orchestrator/1.0'
-        }
-      });
-      console.log(`Railway service health check successful: ${response.status}`);
+      await axios.get(`${url}/health`, { timeout: 30000 });
+      console.log(`Railway service is awake: ${url}`);
     } catch (error) {
-      console.log(`Health check failed with error:`, {
-        message: error.message,
-        code: error.code,
-        response: error.response?.status,
-        data: error.response?.data
-      });
-      
-      console.log('Attempting to wake service at root endpoint...');
+      console.log('Health check failed, attempting to wake service...');
       try {
-        const wakeResponse = await axios.get(url, { 
-          timeout: 30000,
-          headers: {
-            'User-Agent': 'Strapi-Orchestrator/1.0'
-          }
-        });
-        console.log(`Wake attempt response: ${wakeResponse.status}`);
-        
-        // Try health check again after wake attempt
-        await new Promise(r => setTimeout(r, 2000)); // Wait 2 seconds
-        const healthResponse = await axios.get(`${url}/health`, { 
-          timeout: 10000,
-          headers: {
-            'User-Agent': 'Strapi-Orchestrator/1.0'
-          }
-        });
-        console.log(`Health check after wake successful: ${healthResponse.status}`);
-      } catch (wakingError) {
-        console.error('Wake up attempt failed:', {
-          message: wakingError.message,
-          code: wakingError.code,
-          response: wakingError.response?.status,
-          data: wakingError.response?.data
-        });
-        throw new Error(`Failed to wake up Railway service: ${wakingError.message}`);
+        await axios.get(url, { timeout: 30000 });
+      } catch {
+        throw new Error('Failed to wake up Railway service');
       }
     }
 
