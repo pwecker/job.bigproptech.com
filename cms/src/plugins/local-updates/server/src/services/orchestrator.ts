@@ -103,7 +103,9 @@ class RailwayResource extends BaseResource {
       throw new Error('RAILWAY_SERVICE_URL must be set to your deployed service URL');
     }
 
-    const url = this.baseUrl.startsWith('http') ? this.baseUrl : `https://${this.baseUrl}`;
+    const url = this.baseUrl;
+
+    // const url = this.baseUrl.startsWith('http') ? this.baseUrl : `https://${this.baseUrl}`;
     
     console.log(`Waking up Railway service: ${url}`);
     
