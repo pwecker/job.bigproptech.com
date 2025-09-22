@@ -103,10 +103,7 @@ class RailwayResource extends BaseResource {
       throw new Error('RAILWAY_SERVICE_URL must be set to your deployed service URL');
     }
 
-    const url = this.baseUrl;
-
-    // const url = this.baseUrl.startsWith('http') ? this.baseUrl : `https://${this.baseUrl}`;
-    
+    const url = this.baseUrl;    
     console.log(`Waking up Railway service: ${url}`);
     
     try {
@@ -155,6 +152,11 @@ class RailwayResource extends BaseResource {
         throw new Error(`Failed to wake up Railway service: ${wakingError.message}`);
       }
     }
+
+    return { 
+      url, 
+      id: `railway-${this.serviceId}-${Date.now()}` 
+    };
   }
 
   async stop(id: string) {
