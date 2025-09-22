@@ -2,9 +2,6 @@ export default [
   'strapi::logger',
   'strapi::errors',
 
-  // railway
-  'global::railway-proxy',
-
   // 'strapi::security',
   // strapi-geodata plugin
   {
