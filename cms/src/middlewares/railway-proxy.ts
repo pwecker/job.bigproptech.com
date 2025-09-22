@@ -1,38 +1,33 @@
 export default () => {
   return async (ctx: any, next: any) => {
     if (process.env.NODE_ENV === 'production') {
+      const forwardedProto = ctx.headers['x-forwarded-proto'];
+      
       console.log('Railway Proxy Debug:', {
-        'x-forwarded-proto': ctx.headers['x-forwarded-proto'],
-        'x-forwarded-scheme': ctx.headers['x-forwarded-scheme'],
-        'x-forwarded-ssl': ctx.headers['x-forwarded-ssl'],
-        'x-forwarded-port': ctx.headers['x-forwarded-port'],
+        'x-forwarded-proto': forwardedProto,
         'host': ctx.headers['host'],
         'original-secure': ctx.request.secure,
         'original-protocol': ctx.protocol,
       });
       
-      const forwardedProto = ctx.headers['x-forwarded-proto'];
-      const forwardedScheme = ctx.headers['x-forwarded-scheme'];
-      const forwardedSsl = ctx.headers['x-forwarded-ssl'];
-      
-      if (forwardedProto === 'https' || 
-          forwardedScheme === 'https' || 
-          forwardedSsl === 'on' ||
-          ctx.headers['host']?.includes('railway.app')) {
+      if (forwardedProto === 'https') {
+        console.log('Detected Railway HTTPS, applying fix');
         
-        console.log('Setting secure context for Railway HTTPS');
-        ctx.request.secure = true;
+        Object.defineProperty(ctx.request, 'secure', {
+          value: true,
+          writable: true,
+          configurable: true,
+        });
+        
         ctx.protocol = 'https';
         
-        if (ctx.request.URL) {
-          ctx.request.URL.protocol = 'https:';
-        }
+        ctx.app.proxy = true;
+        
+        console.log('After Railway fix:', {
+          'secure': ctx.request.secure,
+          'protocol': ctx.protocol,
+        });
       }
-      
-      console.log('After Railway fix:', {
-        'secure': ctx.request.secure,
-        'protocol': ctx.protocol,
-      });
     }
     
     await next();

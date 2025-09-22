@@ -5,6 +5,8 @@ export default ({ env }) => ({
   
   app: {
     keys: env.array('APP_KEYS'),
+    // koa
+    proxy: env('NODE_ENV') === 'production',
   },
 
   // railway
