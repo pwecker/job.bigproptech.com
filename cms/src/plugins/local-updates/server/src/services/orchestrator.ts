@@ -95,50 +95,42 @@ class DockerResource extends BaseResource {
 }
 
 class RailwayResource extends BaseResource {
-  async start() {
-    const res = await axios.post(
-      'https://backboard.railway.com/graphql/v2',
-      {
-        query: `
-          mutation {
-            deploymentCreate(input: { serviceId: '${process.env.RAILWAY_SERVICE_ID}' }) {
-              id
-              url
-            }
-          }
-        `,
-      },
-      {
-        headers: { Authorization: `Bearer ${process.env.RAILWAY_TOKEN}` },
-      }
-    );
+  private serviceId = process.env.RAILWAY_SERVICE_ID;
+  private baseUrl = process.env.RAILWAY_SERVICE_URL;
 
-    const deployment = res.data.data.deploymentCreate;
-    console.log(`Railway deployment started: ${deployment.url}`);
-    return { url: deployment.url, id: deployment.id };
+  async start() {
+    if (!this.baseUrl) {
+      throw new Error('RAILWAY_SERVICE_URL must be set to your deployed service URL');
+    }
+
+    const url = this.baseUrl.startsWith('http') ? this.baseUrl : `https://${this.baseUrl}`;
+    
+    console.log(`Waking up Railway service: ${url}`);
+    
+    try {
+      await axios.get(`${url}/health`, { timeout: 30000 });
+      console.log(`Railway service is awake: ${url}`);
+    } catch (error) {
+      console.log('Health check failed, attempting to wake service...');
+      try {
+        await axios.get(url, { timeout: 30000 });
+      } catch {
+        throw new Error('Failed to wake up Railway service');
+      }
+    }
+
+    return { 
+      url, 
+      id: `railway-${this.serviceId}-${Date.now()}` 
+    };
   }
 
   async stop(id: string) {
-    try {
-      await axios.post(
-        'https://backboard.railway.com/graphql/v2',
-        {
-          query: `
-            mutation {
-              deploymentDelete(id: '${id}') {
-                id
-              }
-            }
-          `,
-        },
-        {
-          headers: { Authorization: `Bearer ${process.env.RAILWAY_TOKEN}` },
-        }
-      );
-      console.log(`Railway deployment stopped: ${id}`);
-    } catch (error) {
-      console.error(`Failed to stop Railway deployment ${id}:`, error);
-    }
+    console.log(`Railway service will auto-sleep when idle: ${id}`);
+  }
+
+  async isHealthy(url: string): Promise<boolean> {
+    return await super.isHealthy(url);
   }
 }
 
