@@ -5,7 +5,7 @@
   "description": "A Strapi application",
   "scripts": {
     "build": "strapi build",
-    "build:plugin": "strapi plugin:build local-updates",
+    "build:plugin": "cd src/plugins/local-updates && pnpm install @strapi/sdk-plugin && pnpm run build",
     "build:full": "pnpm run build:plugin && pnpm run build",
     "console": "strapi console",
     "deploy": "strapi deploy",
