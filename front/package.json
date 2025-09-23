@@ -14,7 +14,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "deploy": "run-p type-check \"build-only {@}\" -- && aws s3 --profile $AWS_PROFILE sync ./dist s3://$S3_BUCKET --delete && aws cloudfront --profile $AWS_PROFILE create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\""
+    "deploy": "source .env.production && run-p type-check \"build-only {@}\" -- && aws s3 --profile $AWS_PROFILE sync ./dist s3://$S3_BUCKET --delete && aws cloudfront --profile $AWS_PROFILE create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths \"/*\""
   },
   "dependencies": {
     "@tanstack/vue-table": "^8.21.3",
