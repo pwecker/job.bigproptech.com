@@ -7,6 +7,10 @@ export type UXStore = {
   toggleDark: () => void
   setDark: (value: boolean) => void
 
+  // fonts
+  waitForFonts: (timeoutMs?: number) => Promise<void>
+  fontsReady: Ref<boolean>
+
   // preferences
   categories: Ref<Record<string, Record<string, boolean>>>
   toggleCategory: (badge: CategoryBadge) => void
@@ -29,6 +33,32 @@ const activeBadges = computed(() =>
     )
   )
 )
+
+//fonts
+const fontsReady = ref(false)
+async function waitForFonts(timeoutMs = 690) {
+  if (!('fonts' in document)) {
+    fontsReady.value = true
+    return
+  }
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  try {
+    await Promise.race([
+      document.fonts.ready,
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Font load timeout')), timeoutMs)
+      }),
+    ])
+  } catch {} finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
+
+    fontsReady.value = true
+  }
+}
 
 export const useUXStore = defineStore('ux', (): UXStore => {
   function setDark(value: boolean) {
@@ -55,5 +85,5 @@ export const useUXStore = defineStore('ux', (): UXStore => {
     return activeBadges.value.has(`${badge.category}:${badge.value}`)
   }
 
-  return { isDark, setDark, toggleDark, categories, toggleCategory, isActiveCategory }
+  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory }
 })
