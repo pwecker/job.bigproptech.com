@@ -29,4 +29,7 @@ coverage
 
 *.tsbuildinfo
 
+# App
 .env*
+public/*
+!public/favicon.ico
