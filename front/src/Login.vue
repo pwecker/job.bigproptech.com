@@ -1,5 +1,9 @@
 <script setup lang="ts">
 
+// router
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 // google auth
 import { onMounted, onUnmounted } from 'vue'
 import { useAuthStore, AUTH_MESSAGE_TYPES } from '@/stores/auth'
@@ -21,6 +25,7 @@ const handleAuthMessage = async (event: MessageEvent) => {
   if (event.origin !== window.location.origin) return
   if (event.data.type === AUTH_MESSAGE_TYPES.SUCCESS) {
     await authStore.setAuth(event.data.data.jwt, event.data.data.user)
+    router.push(authStore.intendedRoute?.fullPath ?? '/')
   } else if (event.data.type === AUTH_MESSAGE_TYPES.ERROR) {
     // didn't auth
   }

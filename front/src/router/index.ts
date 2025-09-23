@@ -75,6 +75,8 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !authStore.authenticated) {
 
+    authStore.setIntendedRoute(to)
+
     // tease
     authStore.tease()
     next()
