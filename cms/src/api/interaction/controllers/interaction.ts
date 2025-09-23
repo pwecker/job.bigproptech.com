@@ -4,29 +4,40 @@
 
 import { factories } from '@strapi/strapi'
 
-type Filters = Record<string, any>;
-
 export default factories.createCoreController('api::interaction.interaction', ({ strapi }) => ({
 
   async find(ctx) {
     const userId = ctx.state.user.documentId;
-    const filters: Filters = ctx.query?.filters || {};
-    ctx.query.filters = {
-      ...filters,
-      owner: {
-        documentId: userId
-      }
-    };
+    const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-    return super.find(ctx);
+    // owner
+    const baseWhere = (sanitizedQuery.where as Record<string, any>) || {};
+    const results = await strapi.db.query('api::interaction.interaction').findMany({
+      ...sanitizedQuery,
+      where: {
+        ...baseWhere,
+        owner: { documentId: userId }
+      },
+    });
+
+    // pagination
+    const total = await strapi.db.query('api::interaction.interaction').count({
+      where: {
+        ...baseWhere,
+        owner: { documentId: userId }
+      },
+    });
+
+    const sanitizedResults = await this.sanitizeOutput(results, ctx);
+    return this.transformResponse(sanitizedResults, { pagination: { total } });
   },
 
   async findOne(ctx) {
-    const { id } = ctx.params;
-    const userId = ctx.state.user.id;
+    const documentId = ctx.params.id;
+    const userId = ctx.state.user.documentId;
 
     const entity = await strapi.db.query('api::interaction.interaction').findOne({
-      where: { id, owner: { documentId: userId } }
+      where: { documentId, owner: { documentId: userId } }
     });
 
     if (!entity) {
@@ -37,24 +48,51 @@ export default factories.createCoreController('api::interaction.interaction', ({
   },
 
   async create(ctx) {
+    const { query } = ctx;
     const userId = ctx.state.user.documentId;
-    ctx.request.body.data.owner = userId;
-    return super.create(ctx);
+    const data = {
+      ...(ctx.request.body.data || {}),
+      owner: { connect: [userId] }
+    };
+
+    const entity = await strapi.documents('api::interaction.interaction').create({
+      data,
+      ...query,
+      status: 'published'
+    });
+
+    const sanitized = await this.sanitizeOutput(entity, ctx);
+    return this.transformResponse(sanitized);
   },
 
   async update(ctx) {
-    const { id } = ctx.params;
+    const { query } = ctx;
     const userId = ctx.state.user.documentId;
-  
+    const documentId = ctx.params.id;
+
     const existing = await strapi.db.query('api::interaction.interaction').findOne({
-      where: { documentId: id, owner: { documentId: userId } },
+      where: { documentId, owner: { documentId: userId } }
     });
-  
+
     if (!existing) {
-      return ctx.notFound('Issue getting document');
+      return ctx.unauthorized('Not allowed to update this resource');
     }
-  
-    return super.update(ctx);
+
+    // prevent reassignment
+    if (ctx.request.body.data?.owner) {
+      delete ctx.request.body.data.owner;
+    }
+
+    const existingId = existing.documentId;
+    const data = ctx.request.body.data;
+    const updated = await strapi.documents('api::interaction.interaction').update({
+      documentId: existingId,
+      data,
+      ...query,
+      status: 'published'
+    });
+    const sanitized = await this.sanitizeOutput(updated, ctx);
+    return this.transformResponse(sanitized);
   }
 
 }));
