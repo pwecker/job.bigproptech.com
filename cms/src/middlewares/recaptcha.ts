@@ -9,8 +9,18 @@ const siteKey = process.env.RECAPTCHA_SITE_KEY;
 const credsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
 const isDev = process.env.NODE_ENV === 'development';
 
+const host = process.env.REDIS_HOST;
+const port = parseInt(process.env.REDIS_PORT);
+const password = process.env.REDIS_PASS;
+
 let client: RecaptchaEnterpriseServiceClient | null = null;
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis({
+  family: 0,
+  host,
+  port,
+  password,
+  maxRetriesPerRequest: null
+});
 
 if (!isDev) {
   if (credsBase64) {
