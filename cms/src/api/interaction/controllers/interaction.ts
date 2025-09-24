@@ -4,15 +4,31 @@
 
 import { factories } from '@strapi/strapi'
 
+// todo: find this in @strapi
+type Params = {
+  where?: any;
+  filters?: any;
+  select?: any;
+  populate?: any;
+  orderBy?: any;
+  _q?: string;
+  data?: any;
+  page?: number;
+  pageSize?: number;
+  limit?: number;
+  offset?: number;
+  count?: boolean;
+};
+
 export default factories.createCoreController('api::interaction.interaction', ({ strapi }) => ({
 
   async find(ctx) {
     const userId = ctx.state.user.documentId;
-    const sanitizedQuery = await this.sanitizeQuery(ctx);
+    const sanitizedQuery: Params = await this.sanitizeQuery(ctx);
 
     // owner
     const baseWhere = (sanitizedQuery.where as Record<string, any>) || {};
-    
+
     const results = await strapi.db.query('api::interaction.interaction').findMany({
       ...sanitizedQuery,
       where: {
@@ -30,7 +46,36 @@ export default factories.createCoreController('api::interaction.interaction', ({
       },
     });
 
-    const sanitizedResults = await this.sanitizeOutput(results, ctx);
+    const { populate } = sanitizedQuery;
+
+    const trimmedResults = results.map((r) => {
+      const out: any = {
+        id: r.id,
+        flavor: r.flavor,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      };
+
+      if (populate?.datum) {
+        const fields = populate.datum.fields || [];
+        out.datum = {};
+        for (const f of fields) {
+          out.datum[f] = r.datum?.[f];
+        }
+      }
+
+      if (populate?.owner) {
+        const fields = populate.owner.fields || [];
+        out.owner = {};
+        for (const f of fields) {
+          out.owner[f] = r.owner?.[f];
+        }
+      }
+
+      return out;
+    });
+
+    const sanitizedResults = await this.sanitizeOutput(trimmedResults, ctx);
     return this.transformResponse(sanitizedResults, { pagination: { total } });
   },
 
