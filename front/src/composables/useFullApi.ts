@@ -1,5 +1,4 @@
-// src/composables/getListData.ts
-import { computed, type Ref, type ComputedRef, ref } from 'vue'
+import { type Ref, ref } from 'vue'
 import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
 import { watchOnce } from "@vueuse/core"
@@ -39,8 +38,6 @@ export interface ListDataReturn {
   fetchPage: (page: number) => Promise<void>
   getIndexById: (id: string) => number
   getRelativeId: (id: string, offset: number) => string | null
-  getNeighbors: (id: string, range?: number) => string[]
-  useSafeNeighborhood: (id: Ref<string>, range?: number) => ComputedRef<string[]>
 }
 
 const pageSize = 150
@@ -116,27 +113,6 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
     return mergedData.value[targetIndex].documentId
   }
 
-  function getNeighbors(id: string, range = 1) {
-    if (!mergedData.value?.length) return []
-    const neighbors: string[] = []
-    for (let offset = -range; offset <= range; offset++) {
-      if (offset === 0) {
-        neighbors.push(id)
-        continue
-      }
-      const neighborId = getRelativeId(id, offset)
-      if (neighborId) neighbors.push(neighborId)
-    }
-    return neighbors
-  }
-
-  function useSafeNeighborhood(id: Ref<string>, range = 1) {
-    return computed(() => {
-      if (loading.value || !mergedData.value) return []
-      return getNeighbors(id.value, range)
-    })
-  }
-
   singleton = {
     data: mergedData,
     loading,
@@ -145,9 +121,7 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
     nextPage,
     fetchPage,
     getIndexById,
-    getRelativeId,
-    getNeighbors,
-    useSafeNeighborhood,
+    getRelativeId
   }
 
   if (import.meta.hot) {
