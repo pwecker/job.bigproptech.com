@@ -17,11 +17,13 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
+    "@google-cloud/recaptcha-enterprise": "^6.3.0",
     "@strapi/design-system": "^2.0.0-rc.29",
     "@strapi/icons": "^2.0.0-rc.29",
     "@strapi/plugin-cloud": "5.23.2",
     "@strapi/plugin-users-permissions": "5.23.2",
     "@strapi/strapi": "5.23.2",
+    "ioredis": "^5.8.0",
     "mongodb": "^6.19.0",
     "pg": "8.8.0",
     "react": "^18.0.0",
