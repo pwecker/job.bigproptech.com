@@ -12,11 +12,13 @@ export default factories.createCoreController('api::interaction.interaction', ({
 
     // owner
     const baseWhere = (sanitizedQuery.where as Record<string, any>) || {};
+    
     const results = await strapi.db.query('api::interaction.interaction').findMany({
       ...sanitizedQuery,
       where: {
         ...baseWhere,
-        owner: { documentId: userId }
+        owner: { documentId: userId },
+        publishedAt: { $notNull: true }
       },
     });
 
@@ -52,7 +54,8 @@ export default factories.createCoreController('api::interaction.interaction', ({
     const userId = ctx.state.user.documentId;
     const data = {
       ...(ctx.request.body.data || {}),
-      owner: { connect: [userId] }
+      owner: { connect: [userId] },
+      publishedAt: new Date().toISOString()
     };
 
     const entity = await strapi.documents('api::interaction.interaction').create({
@@ -84,12 +87,14 @@ export default factories.createCoreController('api::interaction.interaction', ({
     }
 
     const existingId = existing.documentId;
-    const data = ctx.request.body.data;
+    const updates = ctx.request.body.data;
     const updated = await strapi.documents('api::interaction.interaction').update({
       documentId: existingId,
-      data,
-      ...query,
-      status: 'published'
+      data: {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      },
+      ...query
     });
     const sanitized = await this.sanitizeOutput(updated, ctx);
     return this.transformResponse(sanitized);
