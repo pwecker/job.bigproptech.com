@@ -46,5 +46,5 @@ export default [
   'strapi::favicon',
   'strapi::public',
 
-  'global::railway-proxy',
+  'global::oauth',
 ];
