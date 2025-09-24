@@ -1,5 +1,4 @@
 import { RecaptchaEnterpriseServiceClient } from '@google-cloud/recaptcha-enterprise';
-import Redis from 'ioredis';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -9,18 +8,7 @@ const siteKey = process.env.RECAPTCHA_SITE_KEY;
 const credsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
 const isDev = process.env.NODE_ENV === 'development';
 
-const host = process.env.REDIS_HOST;
-const port = parseInt(process.env.REDIS_PORT);
-const password = process.env.REDIS_PASS;
-
 let client: RecaptchaEnterpriseServiceClient | null = null;
-const redis = new Redis({
-  family: 0,
-  host,
-  port,
-  password,
-  maxRetriesPerRequest: null
-});
 
 if (!isDev) {
   if (credsBase64) {
@@ -70,15 +58,15 @@ module.exports = (config, { strapi }) => {
     const tokenKey = `recaptcha:${recaptcha_token}`;
     const cooldownKey = `cooldown:email-login:${ip}`;
 
-    const inCooldown = await redis.get(cooldownKey);
+    const inCooldown = await strapi.redis.get(cooldownKey);
     if (inCooldown) {
       return ctx.throw(429, 'Too many requests – please wait a few minutes before trying again');
     }
 
-    const cached = await redis.get(tokenKey);
+    const cached = await strapi.redis.get(tokenKey);
     if (cached) {
       strapi.log.debug(`Token ${recaptcha_token} found in cache, skipping verification`);
-      await redis.set(cooldownKey, '1', 'EX', 120);
+      await strapi.redis.set(cooldownKey, '1', 'EX', 120);
       return await next();
     }
 
@@ -109,8 +97,8 @@ module.exports = (config, { strapi }) => {
         return ctx.throw(403, `Low reCAPTCHA score: ${score}`);
       }
 
-      await redis.set(tokenKey, '1', 'EX', 120);
-      await redis.set(cooldownKey, '1', 'EX', 120);
+      await strapi.redis.set(tokenKey, '1', 'EX', 120);
+      await strapi.redis.set(cooldownKey, '1', 'EX', 120);
 
       await next();
     } catch (err) {

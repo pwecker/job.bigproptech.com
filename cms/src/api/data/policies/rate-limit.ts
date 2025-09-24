@@ -1,17 +1,4 @@
 import type { Core } from '@strapi/strapi';
-import Redis from 'ioredis';
-
-const host = process.env.REDIS_HOST;
-const port = parseInt(process.env.REDIS_PORT);
-const password = process.env.REDIS_PASS;
-
-const client = new Redis({
-  family: 0,
-  host,
-  port,
-  password,
-  maxRetriesPerRequest: null
-});
 
 export default async (policyContext: Core.PolicyContext, config, { strapi }) => {
   const { ctx } = policyContext.request;
@@ -22,7 +9,7 @@ export default async (policyContext: Core.PolicyContext, config, { strapi }) => 
     const windowMs = 750;
     const maxRequests = 1;
     
-    const current = await client.incr(key);
+    const current = await strapi.redis.incr(key);
     
     if (current === 1) {
       await strapi.redis.pexpire(key, windowMs);

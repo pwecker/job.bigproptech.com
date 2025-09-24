@@ -13,13 +13,14 @@
     "noEmitOnError": true,
     "noImplicitThis": true,
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "."
   },
   "include": [
     // Include root files
     "./",
     // Include all ts files
     "./**/*.ts",
+    // "src/types/extension.d.ts",
     // Include all js files
     "./**/*.js",
     // Force the JSON files in the src folder to be included

@@ -1,4 +1,9 @@
-// import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
+
+// strapi.redis
+import Redis from 'ioredis';
+import { createRedis } from './utils/redis';
+type ExtendedStrapi = Core.Strapi & { redis?: Redis };
 
 export default {
   /**
@@ -16,5 +21,8 @@ export default {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  async bootstrap({ strapi }: { strapi: ExtendedStrapi }) {
+    const redis = createRedis();
+    strapi.redis = redis;
+  }
 };
