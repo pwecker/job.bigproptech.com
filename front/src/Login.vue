@@ -4,6 +4,41 @@
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
+// recaptcha
+import { useRecaptcha } from '@/composables/useRecaptcha'
+const { ready, loadScript, execute } = useRecaptcha(import.meta.env.VITE_RECAPTCHA_SITE_KEY)
+
+onMounted(() => {
+  loadScript().catch(() => {
+    console.error('Failed to load reCAPTCHA')
+  })
+})
+// email
+import { ref, reactive } from 'vue'
+const submitting = ref(false)
+const formData = reactive({
+  email: ''
+});
+
+async function handleSubmit () {
+  if (submitting.value) return
+  submitting.value = true
+  try {
+    const token = await execute('email_login')
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/email-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recaptcha_token: token,
+        recaptcha_action: 'email_login',
+        to: formData.email
+      }),
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
 // google auth
 import { onMounted, onUnmounted } from 'vue'
 import { useAuthStore, AUTH_MESSAGE_TYPES } from '@/stores/auth'
@@ -69,7 +104,7 @@ import {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form @submit.prevent="handleSubmit">
           <div class="grid gap-6">
             <div class="flex flex-col gap-4">
               <Button @click="openGoogleAuth" type="button" variant="outline" class="w-full cursor-pointer">
@@ -91,14 +126,18 @@ import {
               <div class="grid gap-2">
                 <Label html-for="email">Email</Label>
                 <Input
+                  v-model="formData.email"
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  :disabled="!ready"
                   required
                 />
               </div>
-              <Button type="submit" class="w-full">
-                Send
+              <Button type="submit" :disabled="!ready || submitting" class="w-full">
+                <span v-if="!ready">reCaptcha...</span>
+                <span v-else-if="submitting">Sending...</span>
+                <span v-else>Send</span>
               </Button>
             </div>
             <!-- <div class="text-center text-sm">
@@ -139,3 +178,8 @@ import {
   </div>
 </div>
 </template>
+<style>
+.grecaptcha-badge {
+  z-index: 999
+}
+</style>
