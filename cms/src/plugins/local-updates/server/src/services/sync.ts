@@ -88,6 +88,7 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
     async syncFromSource(segmentMapping: any) {
+      // todo: interface for segment doc map
       const { collection } = segmentMapping;
       if (!collection || !collection.source || !collection.subset || !collection.target) {
         throw new Error('Invalid segmentMapping: missing collection keys');
@@ -97,8 +98,6 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const db = client.db();
         const sourceColl = db.collection(collection.source);
-    
-        // Query all docs where subset exists
         const cursor = sourceColl.find({ [collection.subset]: { $exists: true } });
     
         let processed = 0;

@@ -1,6 +1,9 @@
 import type { Core } from '@strapi/strapi';
 import { type TagServiceReturn } from '../services'
 
+const TAGS_ON = process.env.TAGS_ON === 'true';
+const TAGS_CAP = Number(process.env.TAGS_CAP) || 1;
+
 const controller: Core.Controller = {
   index(ctx) {
     ctx.body = strapi
@@ -13,7 +16,6 @@ const controller: Core.Controller = {
     try {
       const sync = strapi.plugin('local-updates').service('sync');
       const segmentMapping = ctx.request.body.payload.map;
-  
       const result = await sync.syncFromSource(segmentMapping);
   
       ctx.body = { refreshed: true, ...result };
@@ -48,38 +50,13 @@ const controller: Core.Controller = {
 
   async tagOne(ctx) {
     try {
+      if (!TAGS_ON) throw new Error('tags off');
       const tagService = strapi.plugin('local-updates').service('tag') as TagServiceReturn;
-      const { categories, quantifiers } = await tagService.getTagSchemaEnums();
+      const result = await tagService.processSingleItem();
 
-      const untaggedItem = await tagService.getUntaggedItem();
-      if (!untaggedItem) {
-        ctx.body = { message: 'No untagged items available.' };
-        ctx.status = 200;
-        return;
-      }
-
-      const prompt = tagService.generateTagExtractPrompt(categories, quantifiers, untaggedItem);
-      const response = await tagService.postToExtractTags(prompt);
-
-      const tags = tagService.extractJsonArray(response.choices[0].message.content);
-      if (tags.length === 0) {
-        throw new Error('Couldn\'t extract from LLM response');
-      }
-
-      for (const tag of tags) {
-        try {
-          if (tagService.isValidTag(tag, categories, quantifiers)) {
-            await tagService.createTagDoc({
-              ...tag,
-              datum: { connect: untaggedItem.documentId },
-            });
-          }
-        } catch (tagErr) {
-          console.error('Failed to persist tag:', tag, tagErr);
-        }
-      }
-
-      ctx.body = { usage: response.usage, processed: 1, docId: untaggedItem.documentId };
+      ctx.body = result.processed
+        ? result
+        : { message: 'No untagged items available.' };
       ctx.status = 200;
     } catch (err) {
       console.error(err);
@@ -89,57 +66,12 @@ const controller: Core.Controller = {
   },
 
   async tagBatch(ctx) {
-    const HARD_CAP = 2;
     try {
+      if (!TAGS_ON) throw new Error('tags off');
       const tagService = strapi.plugin('local-updates').service('tag') as TagServiceReturn;
-      const { categories, quantifiers } = await tagService.getTagSchemaEnums();
+      const result = await tagService.processBatch(TAGS_CAP);
 
-      let totalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-      let processedCount = 0;
-      let untaggedItem: any;
-
-      while (processedCount < HARD_CAP && (untaggedItem = await tagService.getUntaggedItem())) {
-        try {
-          const prompt = tagService.generateTagExtractPrompt(categories, quantifiers, untaggedItem);
-          const response = await tagService.postToExtractTags(prompt);
-
-          const tags = tagService.extractJsonArray(response.choices[0].message.content);
-          if (tags.length === 0) {
-            console.warn('No tags extracted for item:', untaggedItem.documentId);
-            continue;
-          }
-
-          for (const tag of tags) {
-            try {
-              if (tagService.isValidTag(tag, categories, quantifiers)) {
-                await tagService.createTagDoc({
-                  ...tag,
-                  datum: { connect: untaggedItem.documentId },
-                });
-              } else {
-                console.warn('Invalid tag skipped:', tag);
-              }
-            } catch (tagErr) {
-              console.error('Failed to persist tag:', tag, tagErr);
-            }
-          }
-
-          if (response.usage) {
-            totalUsage.prompt_tokens += response.usage.prompt_tokens ?? 0;
-            totalUsage.completion_tokens += response.usage.completion_tokens ?? 0;
-            totalUsage.total_tokens += response.usage.total_tokens ?? 0;
-          }
-          processedCount++;
-        } catch (itemErr) {
-          console.error('Failed processing item:', untaggedItem?.documentId, itemErr);
-        }
-      }
-
-      ctx.body = {
-        processed: processedCount,
-        usage: totalUsage,
-        cap: HARD_CAP,
-      };
+      ctx.body = result;
       ctx.status = 200;
     } catch (err) {
       console.error(err);

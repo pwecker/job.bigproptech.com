@@ -50,6 +50,8 @@ export interface TagServiceReturn {
   extractJsonArray(response: string): Tag[]
   isValidTag(tag: Tag, categories: string[], quantifiers: string[]): boolean
   createTagDoc(doc: NewTagDoc): Promise<void>
+  processSingleItem(item?: UnTaggedData): Promise<{ usage: any, processed: number, docId?: string }>
+  processBatch(limit: number): Promise<{ usage: any, processed: number, cap: number }>
 }
 
 const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
@@ -236,6 +238,61 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
     }
   }
 
+  async function processSingleItem(item?: UnTaggedData) {
+    const { categories, quantifiers } = await getTagSchemaEnums();
+
+    const untaggedItem = item ?? await getUntaggedItem();
+    if (!untaggedItem) {
+      return { usage: null, processed: 0 };
+    }
+
+    const prompt = generateTagExtractPrompt(categories, quantifiers, untaggedItem);
+    const response = await postToExtractTags(prompt);
+
+    const tags = extractJsonArray(response.choices[0].message.content);
+    if (tags.length === 0) {
+      throw new Error('Could not extract tags from LLM response');
+    }
+
+    for (const tag of tags) {
+      try {
+        if (isValidTag(tag, categories, quantifiers)) {
+          await createTagDoc({
+            ...tag,
+            datum: { connect: untaggedItem.documentId },
+          });
+        }
+      } catch (err) {
+        strapi.log.error('Failed to persist tag', tag, err);
+      }
+    }
+
+    return { usage: response.usage, processed: 1, docId: untaggedItem.documentId };
+  }
+
+  async function processBatch(limit: number) {
+    let totalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+    let processedCount = 0;
+    let untaggedItem: UnTaggedData | null;
+
+    while (processedCount < limit && (untaggedItem = await getUntaggedItem())) {
+      try {
+        const result = await processSingleItem(untaggedItem);
+        processedCount += result.processed;
+
+        if (result.usage) {
+          totalUsage.prompt_tokens += result.usage.prompt_tokens ?? 0;
+          totalUsage.completion_tokens += result.usage.completion_tokens ?? 0;
+          totalUsage.total_tokens += result.usage.total_tokens ?? 0;
+        }
+      } catch (err) {
+        strapi.log.error('Failed processing item', untaggedItem?.documentId, err);
+      }
+    }
+    
+    return { processed: processedCount, usage: totalUsage, cap: limit };
+  }
+
   return {
     getTagSchemaEnums,
     getUntaggedItem,
@@ -243,7 +300,9 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
     postToExtractTags,
     extractJsonArray,
     isValidTag,
-    createTagDoc
+    createTagDoc,
+    processSingleItem,
+    processBatch
   }
 }
 

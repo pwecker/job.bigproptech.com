@@ -165,8 +165,7 @@ export default () => {
         }
       }
 
-      // Start a new resource
-      console.log('Starting new resource...');
+      // start
       current = await r.start();
       return current;
     },
