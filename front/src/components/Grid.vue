@@ -219,7 +219,7 @@ const onRowClicked = (event: RowClickedEvent) => {
 </script>
 <template>
   <AgGridVue
-    class="ag-theme-container h-full"
+    class="ag-theme-container h-full lg:pb-3 lg:pr-3"
     :theme="currentTheme"
     :columnDefs="colDefs"
     :defaultColDef="defaultColDef"
