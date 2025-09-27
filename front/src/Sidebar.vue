@@ -18,7 +18,7 @@ import {
 </script>
 <template>
   <SidebarProvider class="h-full w-full select-none">
-    <Sidebar>
+    <Sidebar class="border-none">
       <SidebarHeader class="h-[var(--app-header-height)] flex items-center"></SidebarHeader>
       <SidebarContent class="text-stone-600 dark:text-stone-300">
 

@@ -17,15 +17,11 @@ const { data, meta, loading, error, nextPage, fetchPage } = listData()
 // ag grid
 import { AgGridVue } from 'ag-grid-vue3'
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'
+import { computed, watch } from 'vue'
 
 // ag grid style
-import { computed, watch } from 'vue'
-import { useUXStore } from '@/stores/ux'
-import { themeQuartz, colorSchemeDark, colorSchemeLight } from 'ag-grid-community'
-const lightTheme = themeQuartz.withPart(colorSchemeLight)
-const darkTheme = themeQuartz.withPart(colorSchemeDark)
-const ux = useUXStore()
-const agGridTheme = computed(() => (ux.isDark ? darkTheme : lightTheme))
+import { useAgGridTheme } from '@/composables/useAgGridTheme'
+const { currentTheme } = useAgGridTheme()
 
 // ag grid module
 import { ModuleRegistry, RowStyleModule, RenderApiModule, InfiniteRowModelModule, PaginationModule, ValidationModule, type RowModelType, type GetRowIdFunc, type GetRowIdParams } from 'ag-grid-community'
@@ -168,7 +164,7 @@ import { useInteractedData } from '@/composables/useInteractions'
 const { getInteractionStatus } = useInteractedData<ListData>(data, { getDataId: (item) => item.documentId })
 import type { RowClassRules } from 'ag-grid-community'
 const rowClassRules: RowClassRules = {
-  'opacity-40': (params) => {
+  'row-interacted': (params) => {
     if (!params.data) return false
     const interaction = getInteractionStatus(params.data.documentId)
     return interaction.value.hasInteraction
@@ -224,7 +220,7 @@ const onRowClicked = (event: RowClickedEvent) => {
 <template>
   <AgGridVue
     class="ag-theme-container h-full"
-    :theme="agGridTheme"
+    :theme="currentTheme"
     :columnDefs="colDefs"
     :defaultColDef="defaultColDef"
     :rowModelType="rowModelType"
@@ -243,3 +239,9 @@ const onRowClicked = (event: RowClickedEvent) => {
     @row-clicked="onRowClicked"
   />
 </template>
+<style scoped>
+:deep(.row-interacted) {
+  color: var(--muted);
+  user-select: none
+}
+</style>

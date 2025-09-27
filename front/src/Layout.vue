@@ -21,8 +21,8 @@ import {
 <template>
 
   <Sidebar>
-    <header class="border-b-1 p-3 h-[var(--app-header-height)] flex items-center justify-between z-0">
-      <SidebarTrigger variant="outline" class="p-4.5 p-4.5 dark:text-stone-300 text-stone-950"/>
+    <header class="p-3 h-[var(--app-header-height)] flex items-center justify-between z-0">
+      <SidebarTrigger variant="outline" class="p-4.5 dark:text-stone-300 text-stone-950"/>
       <Settings/>
     </header>
 
