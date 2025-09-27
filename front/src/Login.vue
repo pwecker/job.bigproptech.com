@@ -71,6 +71,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  const badge = document.querySelector('.grecaptcha-badge')
+  if (badge && badge instanceof HTMLElement) {
+    badge.style.visibility = 'hidden'
+  }
   window.removeEventListener('message', handleAuthMessage)
 })
 
@@ -180,6 +184,6 @@ import {
 </template>
 <style>
 .grecaptcha-badge {
-  z-index: 999
+  z-index: 999;
 }
 </style>
