@@ -2,15 +2,14 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+// props
 const route = useRoute()
-const router = useRouter()
 const currentId = computed(() => route.params.key as string)
 
+// data
 import { listData, type ListData } from '@/composables/useFullApi'
-
 import { useInteractionStore } from '@/stores/interaction'
 const { queueInteraction } = useInteractionStore()
-
 import { useInteractedData } from '@/composables/useInteractions'
 const { data, loading, getIndexById } = listData()
 
@@ -40,6 +39,21 @@ const relativeItems = computed(() =>
   ]
 )
 
+// current item
+import { watch } from 'vue'
+import { getSingleData } from '@/composables/useDetailApi'
+const currentData = computed(() => {
+  const { data: singleData, loading: loadingSingle, error: errorSingle } = getSingleData(currentId.value)
+  return singleData.value
+})
+
+// interaction
+const centerIndex = computed(() => Math.floor(relativeItems.value.length / 2))
+const currentItem = computed(() => 
+  currentItemInteraction.value.hasInteraction ? currentId.value : relativeItems.value[centerIndex.value]
+)
+
+const router = useRouter()
 function setApi(val?: CarouselApi) {
   if (!val) return
   api.value = val
@@ -71,13 +85,10 @@ function setApi(val?: CarouselApi) {
         }
       }, 500)
 
-      console.log(currentItem.value)
-
-      if (data.value && currentItemIndex.value > -1) {
-        
-        const interactedItem = data.value[currentItemIndex.value]
-        queueInteraction(interactedItem, relativeProgress.value > 0 ? 'dislike' : 'like')
+      if (currentData && currentData.value) {
+        queueInteraction(currentData.value as ListData, relativeProgress.value > 0 ? 'dislike' : 'like')
       }
+
       return
     } else if (uninteractedChunk.value === null) {
       setTimeout(() => {
@@ -102,12 +113,6 @@ function setApi(val?: CarouselApi) {
 const emit = defineEmits<{
   (e: 'backgroundClick'): void
 }>()
-
-// computed
-const centerIndex = computed(() => Math.floor(relativeItems.value.length / 2))
-const currentItem = computed(() => 
-  currentItemInteraction.value.hasInteraction ? currentId.value : relativeItems.value[centerIndex.value]
-)
 
 // components
 import DataDetail from '@/components/Detail.vue'

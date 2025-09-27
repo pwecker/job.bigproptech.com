@@ -28,7 +28,7 @@ export interface ListData {
   employer_name: string
   job_posted_at_datetime_utc: string | null
   job_is_remote: boolean
-  tags: TagDoc[]
+  tags?: TagDoc[]
 }
 
 export interface ListDataReturn {

@@ -3,6 +3,8 @@ import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
 
 interface SingleData {
+  documentId: string
+  updatedAt: string
   job_id: string
   job_title: string
   employer_name: string

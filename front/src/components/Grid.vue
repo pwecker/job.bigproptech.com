@@ -49,12 +49,6 @@ const getRowId = ref<GetRowIdFunc>((params: GetRowIdParams) => {
   return params.data.documentId;
 });
 
-// ag grid datasource
-import { shallowRef } from 'vue'
-import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams } from 'ag-grid-community'
-import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
-const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
-
 // ag grid columns
 import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
 const defaultColDef = {
@@ -118,13 +112,19 @@ const colDefs = ref<ColDef[]>([
   }
 ])
 
-// ag grid api
+// ag grid datasource
+import { shallowRef } from 'vue'
+import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams } from 'ag-grid-community'
+import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
+const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {
 
 gridApi.value = params.api;
 params.api!.setGridOption('loading', loading.value);
 
 const updateData = (data: ListData[]) => {
+
+  // todo hmr broke
   const dataSource: IDatasource = {
     rowCount: undefined,
     getRows: async (gridParams: IGetRowsParams) => {
@@ -185,11 +185,14 @@ function refreshRowById(documentId: string) {
 
 import { useInteractionStore } from '@/stores/interaction'
 const interactionStore = useInteractionStore()
-watch(() => interactionStore.data?.slice(), (newValue, oldValue) => {
-  if (!oldValue || oldValue.length === 0) return
-  const oldIds = oldValue?.map(v => v.documentId) || []
-  const udpates = newValue?.filter(v => !oldIds.includes(v.documentId))
-  udpates?.forEach(v => refreshRowById(v.datum.documentId))
+const interactionsLength = computed(() => interactionStore.data?.length ?? 0)
+const interactionsData = computed(() => interactionStore.data?.slice())
+watch(() => [interactionsLength.value, interactionsData.value] as const,
+  ([length, data], [oldLength, oldData]) => {
+    const safeOldData = oldData || []
+    const oldIds = safeOldData.map(v => v.documentId)
+    const updates = data?.filter(v => !oldIds.includes(v.documentId))
+    updates?.forEach(v => refreshRowById(v.datum.documentId))
 })
 
 // formatting

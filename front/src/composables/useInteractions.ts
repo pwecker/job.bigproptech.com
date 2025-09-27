@@ -42,12 +42,15 @@ export function useInteractedData<T>(
 
   const uninteractedChunk = computed(() => {
     if (!dataRef.value || dataRef.value.length === 0) return null
+
+    const validItems = dataRef.value.filter((item): item is T => item != null)
+    if (validItems.length === 0) return null
     
     const uninteractedItems: InteractedDataItem<T>[] = []
     
-    if (center !== undefined && center >= 0 && center < dataRef.value.length) {
+    if (center !== undefined && center >= 0 && center < validItems.length) {
       // Target-based search: look around the target index
-      const maxDistance = Math.max(dataRef.value.length, limit * 2)
+      const maxDistance = Math.max(validItems.length, limit * 2)
       
       for (let distance = 0; distance <= maxDistance && uninteractedItems.length < limit; distance++) {
         // Check positions at increasing distances from target
@@ -55,9 +58,9 @@ export function useInteractedData<T>(
         
         for (const pos of positions) {
           if (uninteractedItems.length >= limit) break
-          if (pos < 0 || pos >= dataRef.value.length) continue
+          if (pos < 0 || pos >= validItems.length) continue
           
-          const item = dataRef.value[pos]
+          const item = validItems[pos]
           const id = getDataId(item)
           const interaction = interactionStore.interactionsByDatum.get(id) ?? null
           const hasInteraction = !!interaction
@@ -78,7 +81,7 @@ export function useInteractedData<T>(
       }
     } else {
       // Default behavior: search from start of array
-      for (const item of dataRef.value) {
+      for (const item of validItems) {
         if (uninteractedItems.length >= limit) break
         
         const id = getDataId(item)
