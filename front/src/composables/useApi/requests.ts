@@ -11,7 +11,7 @@ interface StrapiResponse<T> {
   meta: any
 }
 
-interface StrapiPagination {
+export interface StrapiPagination {
   page: number
   pageSize: number
   pageCount: number

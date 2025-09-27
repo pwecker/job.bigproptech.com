@@ -7,7 +7,7 @@ export default async (policyContext: Core.PolicyContext, config, { strapi }) => 
     const ip = ctx.request.ip;
     const key = `limit:${ip}`;
     const windowMs = 750;
-    const maxRequests = 1;
+    const maxRequests = 2;
     
     const current = await strapi.redis.incr(key);
     

@@ -42,16 +42,18 @@ export default factories.createCoreController('api::interaction.interaction', ({
     const total = await strapi.db.query('api::interaction.interaction').count({
       where: {
         ...baseWhere,
-        owner: { documentId: userId }
+        owner: { documentId: userId },
+        publishedAt: { $notNull: true }
       },
     });
 
+    // population
     const { populate } = sanitizedQuery;
-
     const trimmedResults = results.map((r) => {
       const out: any = {
         id: r.id,
         flavor: r.flavor,
+        documentId: r.documentId,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
       };

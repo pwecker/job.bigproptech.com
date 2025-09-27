@@ -51,7 +51,7 @@ const INTERACTIONS_QUERY: StrapiQueryOptions = {
 
 let interactionSingleton: InteractionDataReturn | null = null
 
-function useInteractionData(): InteractionDataReturn {
+export function useInteractionData(): InteractionDataReturn {
   if (interactionSingleton) {
     return interactionSingleton
   }
@@ -180,6 +180,7 @@ function useInteractionData(): InteractionDataReturn {
     }
   }
 
+  // todo: make: datumId: string, flavor: InteractionFlavor vv
   function queueInteraction(datum: ListData, flavor: InteractionFlavor) {
     const existingPending = pendingInteractions.value.find(p => p.datum.documentId === datum.documentId)
     if (existingPending) {

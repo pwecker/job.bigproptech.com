@@ -1,4 +1,4 @@
-import { useApiRequests } from '@/composables/useApi/requests'
+import { useApiRequests, type StrapiMeta } from '@/composables/useApi/requests'
 import { useApiResource } from '@/composables/useApi/resource'
 import { buildStrapiQuery, type StrapiQueryOptions } from '@/composables/useApi/strapi'
 import { plainAdapter, strapiAdapter } from '@/composables/useApi/adapters'
@@ -25,7 +25,7 @@ export function useApi() {
     baseOptions?: StrapiQueryOptions,
     options?: { defaultHeaders?: () => Record<string, string> }
   ) {
-    return useApiResource<TRead, TWrite, StrapiQueryOptions, any>({
+    return useApiResource<TRead, TWrite, StrapiQueryOptions, StrapiMeta>({
       endpoint,
       fetcher: (url, opts) => request(url, opts),
       buildQuery: (opts?: StrapiQueryOptions) =>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-interface Props {
-  categoryBadges: CategoryBadge[]
-}
-const props = defineProps<Props>()
+import { ref } from 'vue';
+const props = defineProps<{ params: { value: CategoryBadge[] } }>()
+const categoryBadges = ref(props.params.value)
 
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
@@ -176,24 +175,26 @@ import { Badge } from '@/components/ui/badge'
 
 import { computed } from 'vue';
 const groupedCategoryBadges = computed(() => {
-  const active = props.categoryBadges.filter(b => isActiveCategory(b))
-  const inactive = props.categoryBadges.filter(b => !isActiveCategory(b))
+  const active = categoryBadges.value.filter(b => isActiveCategory(b))
+  const inactive = categoryBadges.value.filter(b => !isActiveCategory(b))
   return [...active, ...inactive]
 })
 
 </script>
 <template>
-  <Badge
-    v-for="badge in groupedCategoryBadges"
-    :key="`${badge.category}:${badge.value}`"
-    :class="isActiveCategory(badge)
-      ? [categoryColors[badge.category].active.bg, categoryColors[badge.category].active.border]
-      : [categoryColors[badge.category].inactive.bg, categoryColors[badge.category].inactive.border]
-    "
-    class="cursor-pointer"
-    @click.stop="toggleCategory(badge)"
-    variant="outline"
-  >
-    {{ badge.value }}
-  </Badge>
+  <div class="h-full flex gap-2 items-center">
+    <Badge
+      v-for="badge in groupedCategoryBadges"
+      :key="`${badge.category}:${badge.value}`"
+      :class="isActiveCategory(badge)
+        ? [categoryColors[badge.category].active.bg, categoryColors[badge.category].active.border]
+        : [categoryColors[badge.category].inactive.bg, categoryColors[badge.category].inactive.border]
+      "
+      class="cursor-pointer"
+      @click.stop="toggleCategory(badge)"
+      variant="outline"
+    >
+      {{ badge.value }}
+    </Badge>
+  </div>
 </template>

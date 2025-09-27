@@ -13,7 +13,7 @@ const { isTeased, isAuthenticated } = storeToRefs(authStore)
 import Login from '@/Login.vue'
 import Sidebar from '@/Sidebar.vue'
 import Settings from '@/Settings.vue'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+// import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
@@ -27,10 +27,10 @@ import {
     </header>
 
     <!-- main -->
-    <ScrollArea class="scroll-area z-0 h-[calc(100%-var(--app-header-height))] relative">
+    <!-- <ScrollArea class="scroll-area z-0 h-[calc(100%-var(--app-header-height))] relative"> -->
       <router-view/>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+      <!-- <ScrollBar orientation="horizontal" />
+    </ScrollArea> -->
 
     <!-- overlay content -->
     <Transition name="fade" mode="out-in">

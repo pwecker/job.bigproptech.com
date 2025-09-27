@@ -1,75 +1,198 @@
 <script setup lang="ts">
-// shared list resource
-import { type ListData, type TagDoc, listData } from '@/composables/useFullApi'
-const { data, loading, error, nextPage } = listData()
+import Icon from '@/components/Icon.vue'
+import CategoryBadges from '@/components/Categories.vue'
 
-// scroll
-import { ref, onUnmounted, watch, nextTick } from "vue"
-const sentinel = ref<HTMLDivElement | null>(null)
-let observer: IntersectionObserver | null = null
-const isPaginating = ref(false)
-const hasMorePages = ref(true)
+// data
+import { ref } from 'vue'
+import { type ListData, listData } from '@/composables/useFullApi'
+const { data, meta, loading, error, nextPage, fetchPage } = listData()
 
-watch(sentinel, (el) => {
-  if (observer) {
-    try { observer.disconnect() } catch (e) {}
-    observer = null
+// filtered data
+// import { useFilteredData, createFilters, type FilterFunction } from '@/composables/useFilters'
+// const filters = ref<FilterFunction<ListData>[]>([])
+// filters.value.push(createFilters.notNull('job_posted_at_datetime_utc'))
+// filters.value.push(createFilters.notEmpty('tags'))
+// const { filteredData } = useFilteredData<ListData>(data, { filters })
+
+// ag grid
+import { AgGridVue } from 'ag-grid-vue3'
+import type { ColDef, ICellRendererParams } from 'ag-grid-community'
+
+// ag grid style
+import { computed, watch } from 'vue'
+import { useUXStore } from '@/stores/ux'
+import { themeQuartz, colorSchemeDark, colorSchemeLight } from 'ag-grid-community'
+const lightTheme = themeQuartz.withPart(colorSchemeLight)
+const darkTheme = themeQuartz.withPart(colorSchemeDark)
+const ux = useUXStore()
+const agGridTheme = computed(() => (ux.isDark ? darkTheme : lightTheme))
+
+// ag grid module
+import { ModuleRegistry, RowStyleModule, RenderApiModule, InfiniteRowModelModule, PaginationModule, ValidationModule, type RowModelType, type GetRowIdFunc, type GetRowIdParams } from 'ag-grid-community'
+ModuleRegistry.registerModules([
+  RowStyleModule,
+  RenderApiModule,
+  PaginationModule,
+  InfiniteRowModelModule,
+  ...(import.meta.env.VITE_NODE_ENV !== "production" ? [ValidationModule] : []),
+])
+
+// ag grid attributes
+const rowData = ref<ListData[] | null>(null);
+const rowModelType = ref<RowModelType>('infinite')
+const cacheBlockSize = ref(LIST_PAGE_SIZE);
+const cacheOverflowSize = ref(2);
+const maxConcurrentDatasourceRequests = ref(2);
+const infiniteInitialRowCount = ref(1);
+const maxBlocksInCache = ref(2);
+const getRowId = ref<GetRowIdFunc>((params: GetRowIdParams) => {
+  return params.data.documentId;
+});
+
+// ag grid datasource
+import { shallowRef } from 'vue'
+import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams } from 'ag-grid-community'
+import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
+const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
+
+// ag grid columns
+import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
+const defaultColDef = {
+  flex: 1
+}
+const colDefs = ref<ColDef[]>([
+  {
+    headerComponent: Icon,
+    headerComponentParams: { icon: Star },
+    maxWidth: 75,
+    cellRenderer: Icon,
+    valueGetter: (params) => {
+      if(!params.data) return ''
+      return getInteractionStatus(params.data.documentId).value.flavor
+    },
+    cellRendererParams: (params: ICellRendererParams) => {
+      if (params.value === '') return { icon: null }
+      if (params.value === 'like') return { icon: CircleCheck }
+      if (params.value === 'dislike') return { icon: CircleX }
+    }
+  },
+  {
+    headerComponent: Icon,
+    headerComponentParams: { icon: Timer },
+    maxWidth: 100,
+    valueGetter: (params) => {
+      if(!params.data) return ''
+      return params.data.job_posted_at_datetime_utc || params.data.updatedAt
+    },
+    valueFormatter: params => (params.value ? timeAgo(params.value) : '')
+  },
+  {
+    headerComponent: Icon,
+    headerComponentParams: { icon: MapPinned },
+    maxWidth: 200,
+    valueGetter: (params) => {
+      if(!params.data) return ''
+      return params.data.job_location
+    },
+    valueFormatter: params => params.value
+  },
+  {
+    headerComponent: Icon,
+    headerComponentParams: { icon: BriefcaseBusiness },
+    flex: 2,
+    valueGetter: (params) => {
+      if(!params.data) return ''
+      return params.data.job_title
+    },
+    valueFormatter: params => params.value
+  },
+  {
+    headerComponent: Icon,
+    headerComponentParams: { icon: Tags },
+    flex: 3,
+    valueGetter: (params) => {
+      if(!params.data) return []
+      return params.data.tags
+    },
+    cellRenderer: CategoryBadges
+  }
+])
+
+// ag grid api
+const onGridReady = async (params: GridReadyEvent) => {
+
+gridApi.value = params.api;
+params.api!.setGridOption('loading', loading.value);
+
+const updateData = (data: ListData[]) => {
+  const dataSource: IDatasource = {
+    rowCount: undefined,
+    getRows: async (gridParams: IGetRowsParams) => {
+      const start = gridParams.startRow
+      const end = gridParams.endRow
+      const page = Math.floor(start / LIST_PAGE_SIZE) + 1
+      
+      let last = -1
+      if (meta.value && meta.value.pagination.total) {
+        await fetchPage(page)
+        last = meta.value.pagination.total
+      } else {
+        const more = await nextPage()
+        if (!more) {
+          last = data.length
+        }
+      }
+
+      const rows = data.slice(start, end) ?? []
+      gridParams.successCallback(rows, last)
+    }
   }
 
-  if (!el || !hasMorePages.value) return
-
-  // const scrollContainer = el.closest('[data-reka-scroll-area-viewport]')
-  observer = new IntersectionObserver((entries) => {
-    const entry = entries[0]
-    if (!entry.isIntersecting) return
-    if (isPaginating.value) return
-    isPaginating.value = true
-    try { observer?.unobserve(entry.target) } catch (e) {}
-
-    ;(async () => {
-      try {
-        const more = await nextPage()
-
-        if (!more) {
-          hasMorePages.value = false
-          try { observer?.disconnect() } catch (e) {}
-          observer = null
-        } else {
-          await nextTick()
-          if (hasMorePages.value) {
-            try { observer?.observe(entry.target) } catch (e) {}
-          }
-        }
-      } catch (err) {
-        await nextTick()
-        try { observer?.observe(entry.target) } catch (e) {}
-      } finally {
-        isPaginating.value = false
-      }
-    })()
-  })
-
-  observer.observe(el)
-})
-
-onUnmounted(() => {
-  try { observer?.disconnect() } catch (e) {}
-})
-
-// interacted resource
-import { useInteractedData } from '@/composables/useInteractions'
-const { getInteractionStatus } = useInteractedData<ListData>(data, {
-  getDataId: (item) => item.documentId
-})
-
-// click out
-import { useRouter } from 'vue-router'
-const router = useRouter()
-function clickOut(documentId: string) {
-  router.push(`/${documentId}`)
+  params.api!.setGridOption('datasource', dataSource);
 }
 
-// time ago
+const unwatch = watch<[boolean, ListData[] | null]>(() => [loading.value, data.value], 
+  (newValues) => {
+    const [loading, data] = newValues
+    if (!loading && (data && data.length > 0)) {
+      unwatch()
+      updateData(data)
+      params.api!.setGridOption('loading', loading);
+    }
+  }
+)
+};
+
+// row interaction
+import { useInteractedData } from '@/composables/useInteractions'
+const { getInteractionStatus } = useInteractedData<ListData>(data, { getDataId: (item) => item.documentId })
+import type { RowClassRules } from 'ag-grid-community'
+const rowClassRules: RowClassRules = {
+  'opacity-40': (params) => {
+    if (!params.data) return false
+    const interaction = getInteractionStatus(params.data.documentId)
+    return interaction.value.hasInteraction
+  }
+}
+
+function refreshRowById(documentId: string) {
+  if (!gridApi.value) return
+  const rowNode = gridApi.value.getRowNode(documentId)
+  if (rowNode) {
+    gridApi.value.redrawRows({ rowNodes: [rowNode] })
+  }
+}
+
+import { useInteractionStore } from '@/stores/interaction'
+const interactionStore = useInteractionStore()
+watch(() => interactionStore.data?.slice(), (newValue, oldValue) => {
+  if (!oldValue || oldValue.length === 0) return
+  const oldIds = oldValue?.map(v => v.documentId) || []
+  const udpates = newValue?.filter(v => !oldIds.includes(v.documentId))
+  udpates?.forEach(v => refreshRowById(v.datum.documentId))
+})
+
+// formatting
 function timeAgo(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()
@@ -87,73 +210,33 @@ function timeAgo(dateString: string): string {
   return 'just now'
 }
 
-// components
-import CategoryBadges from '@/components/Categories.vue'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
-import LoadingElement from '@/components/Loading.vue'
-
+// click out
+import type { RowClickedEvent } from 'ag-grid-community'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const onRowClicked = (event: RowClickedEvent) => {
+  router.push(`/${event.data.documentId}`)
+}
 </script>
 <template>
-  <div v-if="loading" class="absolute inset-0 flex justify-center items-center"><LoadingElement/></div>
-  <div v-else-if="error">Error: {{ error }}</div>
-  <div v-else>
-    <Table>
-      <TableHeader class="dark:bg-black/10">
-        <TableRow>
-          <TableHead class="dark:text-stone-300 text-stone-900"><Star :size="20" class="m-auto"/></TableHead>
-          <TableHead class="dark:text-stone-300 text-stone-900"><MapPinned :size="20" class="ml-5"/></TableHead>
-          <TableHead class="dark:text-stone-300 text-stone-900"><Timer :size="20" class="ml-3"/></TableHead>
-          <TableHead class="dark:text-stone-300 text-stone-900 pl-4"><BriefcaseBusiness :size="20" class="m-auto"/></TableHead>
-          <TableHead class="dark:text-stone-300 text-stone-900 pl-4"><Tags :size="20" class="m-auto"/></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow
-          v-for="job in data"
-          :key="job.documentId"
-          class="cursor-pointer select-none hover:bg-muted/50 text-stone-900 dark:text-stone-100"
-          :class="{
-            'cursor-auto opacity-50 select-none hover:bg-muted/0': getInteractionStatus(job.documentId).value.hasInteraction
-          }"
-          @click="!getInteractionStatus(job.documentId).value.hasInteraction && clickOut(job.documentId)"
-        >
-          <TableCell class="text-center pl-4 min-w-14">
-            <CircleCheck class="m-auto text-emerald-300" :size="20" v-if="getInteractionStatus(job.documentId).value.flavor === 'like'"/>
-            <CircleX class="m-auto text-rose-400" :size="20" v-if="getInteractionStatus(job.documentId).value.flavor === 'dislike'"/>
-          </TableCell>
-          <TableCell class="text-xs">
-            <Badge v-if="job.job_is_remote" variant="secondary">
-              Remote
-            </Badge>
-            <div v-else>{{ job.job_location }}</div>
-          </TableCell>
-          <TableCell class="text-xs ">
-            {{ timeAgo(job.job_posted_at_datetime_utc) }}
-          </TableCell>
-          <TableCell class="text-ellipsis overflow-hidden max-w-0 min-w-[30vw] font-medium">
-            <Badge variant="outline" class="mr-2">{{ job.employer_name }}</Badge>
-            <span class="text-xs">{{ job.job_title }}</span>
-          </TableCell>
-          <TableCell class="max-w-0 min-w-[30vw] gap-2 flex">
-            <CategoryBadges :categoryBadges="job.tags" />
-          </TableCell>
-        </TableRow>
-        <TableRow v-if="hasMorePages">
-          <TableCell colspan="4">
-            <div ref="sentinel" class="h-4">
-            </div>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  </div>
+  <AgGridVue
+    class="ag-theme-container h-full"
+    :theme="agGridTheme"
+    :columnDefs="colDefs"
+    :defaultColDef="defaultColDef"
+    :rowModelType="rowModelType"
+    :cacheBlockSize="cacheBlockSize"
+    :cacheOverflowSize="cacheOverflowSize"
+    :maxConcurrentDatasourceRequests="maxConcurrentDatasourceRequests"
+    :infiniteInitialRowCount="infiniteInitialRowCount"
+    :maxBlocksInCache="maxBlocksInCache"
+    :pagination="true"
+    :paginationPageSize="LIST_PAGE_SIZE"
+    :getRowId="getRowId"
+    :rowData="rowData"
+    :rowClassRules="rowClassRules"
+    :suppressCellFocus="true"
+    @grid-ready="onGridReady"
+    @row-clicked="onRowClicked"
+  />
 </template>

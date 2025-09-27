@@ -1,6 +1,7 @@
-import { type Ref, ref } from 'vue'
+import { type ComputedRef, type Ref, ref } from 'vue'
 import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
+import type { StrapiMeta } from './useApi/requests'
 import { watchOnce } from "@vueuse/core"
 import { Categories } from '@/composables/useTagApi'
 
@@ -18,19 +19,21 @@ export interface TagDoc extends Tag {
 }
 
 export interface ListData {
+  updatedAt: string
   documentId: string
   job_id: string
   job_title: string
   job_max_salary: number
   job_location: string
   employer_name: string
-  job_posted_at_datetime_utc: string
+  job_posted_at_datetime_utc: string | null
   job_is_remote: boolean
   tags: TagDoc[]
 }
 
 export interface ListDataReturn {
   data: Ref<ListData[] | null>
+  meta: ComputedRef<StrapiMeta | null>,
   loading: Ref<boolean>
   error: Ref<string | null>
   refetch: (options?: { headers?: Record<string, string> }) => Promise<ListData[] | null>
@@ -40,10 +43,11 @@ export interface ListDataReturn {
   getRelativeId: (id: string, offset: number) => string | null
 }
 
-const pageSize = 150
+export const LIST_PAGE_SIZE: 20 | 50 | 100 = 50
 export const LIST_DATA_KEY = '/datas'
 const LIST_DATA_OPTIONS: StrapiQueryOptions = {
   fields: [
+    'updatedAt',
     'job_id',
     'job_title',
     'job_min_salary',
@@ -53,8 +57,8 @@ const LIST_DATA_OPTIONS: StrapiQueryOptions = {
     'employer_name',
     'job_is_remote'
   ],
-  pagination: { page: 1, pageSize },
-  filters: { tags: { $notNull: true } },
+  pagination: { page: 1, pageSize: LIST_PAGE_SIZE },
+  // filters: { tags: { $notNull: true } },
   sort: ['job_posted_at_datetime_utc:desc'],
   populate: ['tags']
 }
@@ -77,18 +81,36 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
 
   watchOnce(data, (val) => {
     if (val) {
-      mergedData.value = val
+      const total = meta.value?.pagination?.total ?? LIST_PAGE_SIZE
+      mergedData.value = new Array(total)
+
+      val.forEach((row, i) => {
+        mergedData.value![i] = row
+      })
     }
   })
 
   async function fetchPage(page: number) {
-    const res = await refetch({ ...LIST_DATA_OPTIONS, pagination: { page, pageSize } })
+    const startIndex = (page - 1) * LIST_PAGE_SIZE
+    const endIndex = startIndex + LIST_PAGE_SIZE
+    let needsFetch = !mergedData.value
+    const slice = mergedData.value?.slice(startIndex, endIndex).filter(row => row) || []
+    needsFetch = slice.length < endIndex - startIndex
+
+    if (!needsFetch) {
+      return
+    }
+
+    const res = await refetch({ ...LIST_DATA_OPTIONS, pagination: { page, pageSize: LIST_PAGE_SIZE } })
     if (res) {
       if (!mergedData.value) {
-        mergedData.value = res
-      } else {
-        mergedData.value.push(...res)
+        const total = meta.value?.pagination?.total ?? page * LIST_PAGE_SIZE
+        mergedData.value = new Array(total)
       }
+
+      res.forEach((row, i) => {
+        mergedData.value![startIndex + i] = row
+      })
     }
   }
 
@@ -96,12 +118,12 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
     if (!meta.value) return false
     const { page, pageCount } = meta.value.pagination
     const more = page < pageCount
-    if (more) fetchPage(page + 1)
+    if (more) await fetchPage(page + 1)
     return more
   }
 
   function getIndexById(id: string) {
-    return mergedData.value?.findIndex(d => d.documentId === id) ?? -1
+    return mergedData.value?.findIndex(d => d && d.documentId === id) ?? -1
   }
 
   function getRelativeId(id: string, offset: number) {
@@ -115,6 +137,7 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
 
   singleton = {
     data: mergedData,
+    meta,
     loading,
     error,
     refetch,

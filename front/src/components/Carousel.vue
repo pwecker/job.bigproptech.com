@@ -6,7 +6,7 @@ const route = useRoute()
 const router = useRouter()
 const currentId = computed(() => route.params.key as string)
 
-import { listData } from '@/composables/useFullApi'
+import { listData, type ListData } from '@/composables/useFullApi'
 
 import { useInteractionStore } from '@/stores/interaction'
 const { queueInteraction } = useInteractionStore()
@@ -71,7 +71,10 @@ function setApi(val?: CarouselApi) {
         }
       }, 500)
 
+      console.log(currentItem.value)
+
       if (data.value && currentItemIndex.value > -1) {
+        
         const interactedItem = data.value[currentItemIndex.value]
         queueInteraction(interactedItem, relativeProgress.value > 0 ? 'dislike' : 'like')
       }
