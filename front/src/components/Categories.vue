@@ -182,7 +182,7 @@ const groupedCategoryBadges = computed(() => {
 
 </script>
 <template>
-  <div class="h-full flex gap-2 items-center">
+  <div>
     <Badge
       v-for="badge in groupedCategoryBadges"
       :key="`${badge.category}:${badge.value}`"
@@ -190,7 +190,7 @@ const groupedCategoryBadges = computed(() => {
         ? [categoryColors[badge.category].active.bg, categoryColors[badge.category].active.border]
         : [categoryColors[badge.category].inactive.bg, categoryColors[badge.category].inactive.border]
       "
-      class="cursor-pointer"
+      class="mr-2 mb-2 cursor-pointer"
       @click.stop="toggleCategory(badge)"
       variant="outline"
     >

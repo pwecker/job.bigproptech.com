@@ -1,4 +1,15 @@
 <script setup lang="ts">
+
+// account settings
+import { Button } from '@/components/ui/button'
+import { Settings, Sun, Moon, LogOut } from 'lucide-vue-next'
+import { useUXStore } from '@/stores/ux'
+const uxStore = useUXStore()
+const { toggleDark } = uxStore
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const logout = (() => router.push('logout'))
+
 // components
 import Interactions from './components/Interactions.vue';
 import { 
@@ -60,7 +71,24 @@ import {
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter class="w-full flex flex-row justify-between">
+        <Button
+          class="cursor-pointer"
+          variant="outline"
+          @click="logout()"
+          size="icon"
+        >
+          <LogOut/>
+        </Button>
+        <Button
+          class="cursor-pointer"
+          variant="outline"
+          @click="toggleDark()"
+          size="icon"
+        >
+          <Moon class="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Sun class="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
+        </Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset class="overflow-hidden">
