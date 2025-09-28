@@ -244,4 +244,7 @@ const onRowClicked = (event: RowClickedEvent) => {
   color: var(--muted);
   user-select: none
 }
+:deep(.ag-paging-panel) {
+  font-size: var(--ag-pagination-font-size)
+}
 </style>
