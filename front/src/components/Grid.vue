@@ -4,6 +4,12 @@ import CategoryBadges from '@/components/Categories.vue'
 
 // unmount
 import { onUnmounted } from 'vue'
+if (import.meta.hot) {
+  if (!import.meta.hot.data.gridState) {
+    import.meta.hot.data.gridState = { gridApi: null, watchers: [] }
+  }
+}
+const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: null, watchers: [] }
 const watchers = ref<(() => void)[]>([])
 
 // data
@@ -120,6 +126,9 @@ const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {
 
   gridApi.value = params.api;
+  if (import.meta.hot) {
+    gridState.gridApi = gridApi.value
+  }
   params.api!.setGridOption('loading', loading.value);
 
   const updateData = (data: ListData[]) => {
@@ -163,6 +172,10 @@ const onGridReady = async (params: GridReadyEvent) => {
   )
 
   watchers.value.push(unwatch)
+
+  if (!loading.value && data.value && data.value.length > 0) {
+    updateData(data.value)
+  }
 };
 
 // row interaction
@@ -227,6 +240,16 @@ const onRowClicked = (event: RowClickedEvent) => {
 onUnmounted(() => {
   watchers.value.forEach(unwatch => unwatch())
   watchers.value = []
+
+  if (!import.meta.hot) {
+    if (gridApi.value) {
+      gridApi.value.destroy()
+      gridApi.value = null
+    }
+  }
+  if (import.meta.hot) {
+    gridState.watchers = watchers.value
+  }
 
   if (gridApi.value) {
     gridApi.value.destroy()
