@@ -60,7 +60,7 @@ function setApi(val?: CarouselApi) {
   prevSnap.value = val.selectedScrollSnap()
 
   val.on('scroll', (embla) => {
-    if (locked.value) return
+    if (locked.value || !isMounted.value) return
 
     const snaps = embla.scrollSnapList()
     const selected = embla.selectedScrollSnap()
@@ -72,7 +72,9 @@ function setApi(val?: CarouselApi) {
       prevSnap.value = selected
       outroAnimation.value = true
 
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
+        if (!isMounted.value) return
+
         locked.value = false
         relativeProgress.value = 0
         outroAnimation.value = false
@@ -85,18 +87,22 @@ function setApi(val?: CarouselApi) {
         }
       }, 500)
 
+      timeouts.value.push(timeoutId)
+
       if (currentData && currentData.value) {
         queueInteraction(currentData.value as ListData, relativeProgress.value > 0 ? 'dislike' : 'like')
       }
 
       return
     } else if (uninteractedChunk.value === null) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         locked.value = false
         relativeProgress.value = 0
         outroAnimation.value = false
         router.push({ path: `/` })
       }, 350)
+
+      timeouts.value.push(timeoutId)
     }
 
     const currentSnap = snaps[selected]
@@ -113,6 +119,21 @@ function setApi(val?: CarouselApi) {
 const emit = defineEmits<{
   (e: 'backgroundClick'): void
 }>()
+
+// unmount
+import { onUnmounted } from 'vue'
+const isMounted = ref(true)
+const timeouts = ref<NodeJS.Timeout[]>([])
+
+onUnmounted(() => {
+  isMounted.value = false
+  timeouts.value.forEach(id => clearTimeout(id))
+  timeouts.value = []
+
+  if (api.value) {
+    api.value.destroy()
+  }
+})
 
 // components
 import DataDetail from '@/components/Detail.vue'

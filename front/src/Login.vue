@@ -71,10 +71,13 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  submitting.value = false
+
   const badge = document.querySelector('.grecaptcha-badge')
   if (badge && badge instanceof HTMLElement) {
     badge.style.visibility = 'hidden'
   }
+  
   window.removeEventListener('message', handleAuthMessage)
 })
 

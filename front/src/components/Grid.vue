@@ -2,6 +2,10 @@
 import Icon from '@/components/Icon.vue'
 import CategoryBadges from '@/components/Categories.vue'
 
+// unmount
+import { onUnmounted } from 'vue'
+const watchers = ref<(() => void)[]>([])
+
 // data
 import { ref } from 'vue'
 import { type ListData, listData } from '@/composables/useFullApi'
@@ -115,48 +119,50 @@ import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
 const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {
 
-gridApi.value = params.api;
-params.api!.setGridOption('loading', loading.value);
+  gridApi.value = params.api;
+  params.api!.setGridOption('loading', loading.value);
 
-const updateData = (data: ListData[]) => {
+  const updateData = (data: ListData[]) => {
 
-  // todo hmr broke
-  const dataSource: IDatasource = {
-    rowCount: undefined,
-    getRows: async (gridParams: IGetRowsParams) => {
-      const start = gridParams.startRow
-      const end = gridParams.endRow
-      const page = Math.floor(start / LIST_PAGE_SIZE) + 1
-      
-      let last = -1
-      if (meta.value && meta.value.pagination.total) {
-        await fetchPage(page)
-        last = meta.value.pagination.total
-      } else {
-        const more = await nextPage()
-        if (!more) {
-          last = data.length
+    // todo hmr broke
+    const dataSource: IDatasource = {
+      rowCount: undefined,
+      getRows: async (gridParams: IGetRowsParams) => {
+        const start = gridParams.startRow
+        const end = gridParams.endRow
+        const page = Math.floor(start / LIST_PAGE_SIZE) + 1
+        
+        let last = -1
+        if (meta.value && meta.value.pagination.total) {
+          await fetchPage(page)
+          last = meta.value.pagination.total
+        } else {
+          const more = await nextPage()
+          if (!more) {
+            last = data.length
+          }
         }
+
+        const rows = data.slice(start, end) ?? []
+        gridParams.successCallback(rows, last)
       }
-
-      const rows = data.slice(start, end) ?? []
-      gridParams.successCallback(rows, last)
     }
+
+    params.api!.setGridOption('datasource', dataSource);
   }
 
-  params.api!.setGridOption('datasource', dataSource);
-}
-
-const unwatch = watch<[boolean, ListData[] | null]>(() => [loading.value, data.value], 
-  (newValues) => {
-    const [loading, data] = newValues
-    if (!loading && (data && data.length > 0)) {
-      unwatch()
-      updateData(data)
-      params.api!.setGridOption('loading', loading);
+  const unwatch = watch<[boolean, ListData[] | null]>(() => [loading.value, data.value], 
+    (newValues) => {
+      const [loading, data] = newValues
+      if (!loading && (data && data.length > 0)) {
+        unwatch()
+        updateData(data)
+        params.api!.setGridOption('loading', loading);
+      }
     }
-  }
-)
+  )
+
+  watchers.value.push(unwatch)
 };
 
 // row interaction
@@ -183,13 +189,14 @@ import { useInteractionStore } from '@/stores/interaction'
 const interactionStore = useInteractionStore()
 const interactionsLength = computed(() => interactionStore.data?.length ?? 0)
 const interactionsData = computed(() => interactionStore.data?.slice())
-watch(() => [interactionsLength.value, interactionsData.value] as const,
+const unwatch = watch(() => [interactionsLength.value, interactionsData.value] as const,
   ([length, data], [oldLength, oldData]) => {
     const safeOldData = oldData || []
     const oldIds = safeOldData.map(v => v.documentId)
     const updates = data?.filter(v => !oldIds.includes(v.documentId))
     updates?.forEach(v => refreshRowById(v.datum.documentId))
 })
+watchers.value.push(unwatch)
 
 // formatting
 function timeAgo(dateString: string): string {
@@ -216,6 +223,17 @@ const router = useRouter()
 const onRowClicked = (event: RowClickedEvent) => {
   router.push(`/${event.data.documentId}`)
 }
+
+onUnmounted(() => {
+  watchers.value.forEach(unwatch => unwatch())
+  watchers.value = []
+
+  if (gridApi.value) {
+    gridApi.value.destroy()
+    gridApi.value = null
+  }
+})
+
 </script>
 <template>
   <AgGridVue

@@ -16,7 +16,7 @@ const handleGoogleCallback = async () => {
       window.opener.postMessage({ type: AUTH_MESSAGE_TYPES.ERROR }, window.location.origin)
       window.close()
     } else {
-      router.push('/login')
+      if (isMounted.value) router.push('/login')
     }
     return
   }
@@ -35,6 +35,9 @@ const handleGoogleCallback = async () => {
     }
 
     const data = await response.json()
+
+    if (!isMounted.value) return
+
     authStore.setAuth(data.jwt, data.user)
 
     if (window.opener) {
@@ -52,14 +55,18 @@ const handleGoogleCallback = async () => {
       window.opener.postMessae({ type: AUTH_MESSAGE_TYPES.ERROR }, window.location.origin)
       window.close()
     } else {
-      router.push('/login')
+      if (isMounted.value) router.push('/login')
     }
   }
 }
 
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+const isMounted = ref(true)
 onMounted(() => {
   handleGoogleCallback()
+})
+onUnmounted(() => {
+  isMounted.value = false
 })
 </script>
 <template></template>
