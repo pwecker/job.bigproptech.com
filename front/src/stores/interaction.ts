@@ -81,9 +81,14 @@ export function useInteractionData(): InteractionDataReturn {
   function hydrateResource() {
     if (authStore.jwt) {
       const res = resource.getAll()
-      data = res.data
-      loading = res.loading
-      error = res.error
+      data.value = res.data.value
+      loading.value = res.loading.value
+      error.value = res.error.value
+
+      // forward future changes (keep refs in sync)
+      watch(res.data, v => { data.value = v })
+      watch(res.loading, v => { loading.value = v })
+      watch(res.error, v => { error.value = v })
       refetch = res.refetch
     } else {
       data.value = null
@@ -232,7 +237,8 @@ export const useInteractionStore = defineStore('interaction', () => {
         await interactionData.waitForHydration()
         await interactionData.flushPendingInteractions()
       } else {
-        interactionData.data.value = null
+        // todo: computed is readonly
+        // interactionData.data.value = null
       }
     }
   )

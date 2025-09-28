@@ -200,8 +200,8 @@ function refreshRowById(documentId: string) {
 
 import { useInteractionStore } from '@/stores/interaction'
 const interactionStore = useInteractionStore()
-const interactionsLength = computed(() => interactionStore.data?.length ?? 0)
-const interactionsData = computed(() => interactionStore.data?.slice())
+const interactionsLength = computed(() => interactionStore.allInteractions?.length ?? 0)
+const interactionsData = computed(() => interactionStore.allInteractions?.slice())
 const unwatch = watch(() => [interactionsLength.value, interactionsData.value] as const,
   ([length, data], [oldLength, oldData]) => {
     const safeOldData = oldData || []
