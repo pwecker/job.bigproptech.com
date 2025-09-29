@@ -20,17 +20,13 @@ import {
 </script>
 <template>
 
-  <Sidebar>
+  <Sidebar class="lg:px-4 lg:pl-2 lg:pb-3">
     <header class="p-3 h-[var(--app-header-height)] flex items-center justify-between z-0">
       <SidebarTrigger variant="outline" class="p-4.5 dark:text-stone-300 text-stone-950"/>
       <Settings/>
     </header>
 
-    <!-- main -->
-    <!-- <ScrollArea class="scroll-area z-0 h-[calc(100%-var(--app-header-height))] relative"> -->
-      <router-view/>
-      <!-- <ScrollBar orientation="horizontal" />
-    </ScrollArea> -->
+    <router-view/>
 
     <!-- overlay content -->
     <Transition name="fade" mode="out-in">

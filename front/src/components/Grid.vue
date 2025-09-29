@@ -260,7 +260,7 @@ onUnmounted(() => {
 </script>
 <template>
   <AgGridVue
-    class="ag-theme-container h-full lg:pb-3 lg:pr-3"
+    class="ag-theme-container h-full"
     :theme="currentTheme"
     :columnDefs="colDefs"
     :defaultColDef="defaultColDef"

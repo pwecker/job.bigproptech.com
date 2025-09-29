@@ -51,7 +51,7 @@ import LoadingElement from '@/components/Loading.vue'
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px] lg:max-w-[800px] h-[72vh] flex flex-col">
       <DialogHeader class="flex-shrink-0">
-        <DialogTitle>Filters</DialogTitle>
+        <DialogTitle>Tags</DialogTitle>
       </DialogHeader>
       <DialogDescription></DialogDescription>
       <ScrollArea class="flex-1 min-h-0">

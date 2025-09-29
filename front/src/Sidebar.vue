@@ -71,7 +71,7 @@ import {
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter class="w-full flex flex-row justify-between lg:p-4">
+      <SidebarFooter class="w-full flex flex-row justify-between p-0 pl-3 pb-4">
         <Button
           class="cursor-pointer"
           variant="outline"
