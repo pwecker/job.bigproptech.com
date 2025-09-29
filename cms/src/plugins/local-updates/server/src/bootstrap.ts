@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import { type SyncService } from './services'
 
 const TAGS_ON: boolean = process.env.TAGS_ON === 'true';
 const TAGS_CAP: number = Number(process.env.TAGS_CAP) || 1;
@@ -19,7 +20,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         if (documents.length === 0) return;
 
         documents.forEach(async (document) => {
-          const { config, map } = document;
+          const { documentId, config, map } = document;
 
           // update
           strapi.log.info('[local-updates] update');
@@ -29,8 +30,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
           // sync
           strapi.log.info('[local-updates] sync');
-          const sync = strapi.plugin('local-updates').service('sync');
-          const syncResult = await sync.syncFromSource(map);
+          const sync = strapi.plugin('local-updates').service('sync') as unknown as SyncService;
+          const syncResult = await sync.syncFromSource({ documentId, map });
           const { processed } = syncResult
 
           // tags
