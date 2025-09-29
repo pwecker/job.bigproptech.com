@@ -42,6 +42,7 @@ class DockerResource extends BaseResource {
        -e REDIS_HOST=host.docker.internal \
        -e REDIS_PORT=6379 \
        -e MONGODB_URI=mongodb://host.docker.internal:27017/nest \
+       -e DOCKERIZED=true \
        ${this.image}`
     );
     
