@@ -47,12 +47,12 @@ const bootstrap = (app: any) => {
 
       const buildSyncPayload = (values: any, actionType: string) => ({
         type: actionType,
-        payload: { map: values.map },
+        payload: { documentId: values.documentId, map: values.map },
       });
 
       const buildUpdatePayload = (values: any, actionType: string) => ({
         type: actionType,
-        payload: { config: values.config },
+        payload: { documentId: values.documentId, config: values.config },
       });
 
       const buildTagPayload = (values: any, actionType: string) => ({

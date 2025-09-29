@@ -110,6 +110,12 @@
     },
     "geohash": {
       "type": "string"
+    },
+    "segments": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::segment.segment",
+      "inversedBy": "data"
     }
   }
 }

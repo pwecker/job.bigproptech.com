@@ -22,6 +22,12 @@
     },
     "map": {
       "type": "json"
+    },
+    "data": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::data.data",
+      "mappedBy": "segments"
     }
   }
 }

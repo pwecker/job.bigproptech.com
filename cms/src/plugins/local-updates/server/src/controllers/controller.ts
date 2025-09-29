@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/strapi';
-import { type TagServiceReturn } from '../services'
+import { type TagServiceReturn, SyncService } from '../services'
+
 
 const TAGS_ON = process.env.TAGS_ON === 'true';
 const TAGS_CAP = Number(process.env.TAGS_CAP) || 1;
@@ -14,9 +15,9 @@ const controller: Core.Controller = {
 
   async sync(ctx) {
     try {
-      const sync = strapi.plugin('local-updates').service('sync');
-      const segmentMapping = ctx.request.body.payload.map;
-      const result = await sync.syncFromSource(segmentMapping);
+      const sync = strapi.plugin('local-updates').service('sync') as unknown as SyncService;
+      const { map, documentId } = ctx.request.body.payload;
+      const result = await sync.syncFromSource({ documentId, map });
   
       ctx.body = { refreshed: true, ...result };
       ctx.status = 200;

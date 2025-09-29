@@ -429,6 +429,7 @@ export interface ApiDataData extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::data.data'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    segments: Schema.Attribute.Relation<'manyToMany', 'api::segment.segment'>;
     tags: Schema.Attribute.Relation<'oneToMany', 'api::tag.tag'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -484,6 +485,7 @@ export interface ApiSegmentSegment extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    data: Schema.Attribute.Relation<'manyToMany', 'api::data.data'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
