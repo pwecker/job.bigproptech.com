@@ -1,5 +1,10 @@
 <script setup lang="ts">
 
+// user
+import { computed } from 'vue'
+import { useAuthStore } from './stores/auth'
+const authStore = useAuthStore()
+
 // account settings
 import { Button } from '@/components/ui/button'
 import { Settings, Sun, Moon, LogOut } from 'lucide-vue-next'
@@ -71,7 +76,7 @@ import {
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter class="w-full flex flex-row justify-between p-0 pl-3 pb-4">
+      <SidebarFooter class="w-full flex flex-row justify-between items-center p-0 pl-3 pb-4">
         <Button
           class="cursor-pointer"
           variant="outline"
@@ -80,6 +85,7 @@ import {
         >
           <LogOut/>
         </Button>
+        <div class="overflow-hidden truncate">{{ authStore.user?.username || 'Guest' }}</div>
         <Button
           class="cursor-pointer"
           variant="outline"
