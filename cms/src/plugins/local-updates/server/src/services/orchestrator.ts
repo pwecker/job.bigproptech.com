@@ -11,6 +11,12 @@ interface WorkflowResource {
   isHealthy?(url: string, containerId?: string): Promise<boolean>;
 }
 
+export interface WorkflowReturn {
+  workflowId: string | null
+  containerId: string
+  url: string
+}
+
 abstract class BaseResource implements WorkflowResource {
   abstract start(): Promise<{ id: string; url: string }>;
   abstract stop(id: string): Promise<void>;
@@ -107,6 +113,7 @@ class RailwayResource extends BaseResource {
     const url = this.baseUrl;
 
     try {
+      
       await axios.get(`${url}/health`, { timeout: 30000 });
       console.log(`Railway service is awake: ${url}`);
     } catch (error) {
@@ -133,6 +140,38 @@ class RailwayResource extends BaseResource {
   }
 }
 
+class MockResource extends BaseResource {
+
+  async start() {
+    const url = 'http://localhost:3000';
+
+    try {
+      await axios.get(`${url}/health`, { timeout: 30000 });
+      console.log(`Mock service is awake: ${url}`);
+    } catch (error) {
+      console.log('Health check failed, attempting to wake service...');
+      try {
+        await axios.get(url, { timeout: 30000 });
+      } catch {
+        throw new Error('Failed to wake up Mock service');
+      }
+    }
+
+    return { 
+      url, 
+      id: `mock-${Date.now()}` 
+    };
+  }
+
+  async stop(id: string) {
+    console.log(`Railway service will auto-sleep when idle: ${id}`);
+  }
+
+  async isHealthy(url: string): Promise<boolean> {
+    return await super.isHealthy(url);
+  }
+}
+
 export default () => {
   let current: { url: string; id: string } | null = null;
   let resource: WorkflowResource;
@@ -140,7 +179,9 @@ export default () => {
   function getResource(): WorkflowResource {
     if (!resource) {
       const driver = process.env.ORCHESTRATOR_DRIVER || 'docker';
-      resource = driver === 'railway' ? new RailwayResource() : new DockerResource();
+      if (driver === 'railway') resource = new RailwayResource();
+      else if (driver === 'mock') resource = new MockResource();
+      else resource = new DockerResource();
     }
     return resource;
   }
@@ -171,7 +212,7 @@ export default () => {
       return current;
     },
 
-    async runWorkflow(workflow: any): Promise<any> {
+    async runWorkflow(workflow: any): Promise<WorkflowReturn> {
       const resource = getResource();
       
       // Use ensureStarted instead of directly calling start()
@@ -180,7 +221,7 @@ export default () => {
       try {
         const result = await resource.run(url, workflow);
         return { 
-          workflowId: result.workflowId ?? result, 
+          workflowId: result?.workflowId || null, 
           containerId: id, 
           url 
         };
