@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/strapi';
 export type { TagServiceReturn } from './tag'
 export type { SyncService } from './sync'
+export type { WorkflowReturn } from './orchestrator'
 import service from './service';
 import orchestrator from './orchestrator';
 import sync from './sync';
