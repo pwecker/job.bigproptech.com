@@ -13,7 +13,11 @@ export const useAgGridTheme = () => {
     backgroundColor: `var(--background)`,
     headerBackgroundColor: `var(--background)`,
     headerTextColor: `var(--muted-foreground)`,
-    rowHoverColor: `var(--primary-foreground)`
+    rowHoverColor: `var(--primary-foreground)`,
+    inputBorderRadius: '0',
+    wrapperBorderRadius: '0',
+    wrapperBorder: false,
+    headerHeight: 0
   }))
   
   const currentTheme = computed(() => {

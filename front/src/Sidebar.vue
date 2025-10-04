@@ -16,7 +16,8 @@ const router = useRouter()
 const logout = (() => router.push('logout'))
 
 // components
-import Interactions from './components/Interactions.vue';
+import { BriefcaseBusiness } from 'lucide-vue-next'
+import Interactions from './components/Interactions.vue'
 import { 
   SidebarHeader,
   SidebarInset,
@@ -34,19 +35,21 @@ import {
 </script>
 <template>
   <SidebarProvider class="h-full w-full select-none">
-    <Sidebar class="border-none">
-      <SidebarHeader class="h-[var(--app-header-height)] flex items-center"></SidebarHeader>
-      <SidebarContent class="text-stone-600 dark:text-stone-300">
+    <Sidebar class="border-r-1 border-r-border">
+      <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
+        <BriefcaseBusiness class="scale-65 text-primary"/>
+      </SidebarHeader>
+      <SidebarContent class="text-primary font-light">
 
         <Interactions>
           <!-- likes -->
            <template #liked="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel class="font-thin text-sm">{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-light text-base text-primary">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem v-for="i in items" :key="`likes:${i.documentId}`">
-                    <SidebarMenuButton size="sm" class="font-light text-sm">
+                  <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`likes:${i.documentId}`">
+                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-base rounded-none">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -59,11 +62,11 @@ import {
           <!-- recent -->
           <template #recent="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel class="font-thin text-sm">{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-light text-base text-primary">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem v-for="i in items" :key="`recent:${i.documentId}`">
-                    <SidebarMenuButton size="sm" class="font-light text-sm">
+                  <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`recent:${i.documentId}`">
+                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-base rounded-none">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -76,19 +79,19 @@ import {
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter class="w-full flex flex-row justify-between items-center p-0 pl-3 py-1">
+      <SidebarFooter class="border-t-1 border-t-border w-full h-[var(--app-footer-height)] flex flex-row justify-between items-center px-1">
         <Button
-          class="cursor-pointer"
-          variant="outline"
+          class="cursor-pointer text-primary scale-90"
+          variant="ghost"
           @click="logout()"
           size="icon"
         >
           <LogOut/>
         </Button>
-        <div class="overflow-hidden truncate text-xs font-thin tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
+        <div class="overflow-hidden truncate text-base font-light dark:font-light tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
         <Button
-          class="cursor-pointer"
-          variant="outline"
+          class="cursor-pointer text-primary scale-90"
+          variant="ghost"
           @click="toggleDark()"
           size="icon"
         >

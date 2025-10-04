@@ -45,8 +45,8 @@ import LoadingElement from '@/components/Loading.vue'
 
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="outline" size="icon" @click="$event.currentTarget.blur()">
-        <SlidersHorizontal class="dark:text-stone-300 text-stone-950" :size="10"/>
+      <Button variant="ghost" class="cursor-pointer text-primary" size="icon" @click="$event.currentTarget.blur()">
+        <SlidersHorizontal class="text-primary scale-90" :size="10"/>
       </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px] lg:max-w-[800px] h-[72vh] flex flex-col">

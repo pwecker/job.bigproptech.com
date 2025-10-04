@@ -180,8 +180,8 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
 
     <!-- interaction icon -->
     <div :class="{ 'animate-scale-fade-out': outroAnimation }" class="pointer-events-none absolute inset-0 flex justify-center items-center">
-      <CircleCheck v-if="relativeProgress < 0" :style="{ opacity: (relativeProgress * -1) }" class="text-emerald-800 w-[12rem] h-[12rem]"/>
-      <CircleX v-if="relativeProgress > 0" :style="{ opacity: relativeProgress }" class="text-rose-800 w-[12rem] h-[12rem]"/>
+      <CircleCheck v-if="relativeProgress < 0" :style="{ opacity: (relativeProgress * -1) }" class="text-ring w-[12rem] h-[12rem]"/>
+      <CircleX v-if="relativeProgress > 0" :style="{ opacity: relativeProgress }" class="text-ring w-[12rem] h-[12rem]"/>
     </div>
   </div>
 </template>

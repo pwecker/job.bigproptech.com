@@ -19,6 +19,25 @@ export enum Categories {
   PerksCulture = "perks & culture",
 }
 
+export type CategorySet = Record<Categories, string[]>
+type CategoryColors = Record<Categories, string>
+export const categoryColors: CategoryColors = {
+  [Categories.ProgrammingLanguage]: 'bg-indigo-400 dark:bg-indigo-300',
+  [Categories.Framework]: 'bg-teal-400 dark:bg-teal-500',
+  [Categories.CloudPlatform]: 'bg-indigo-300 dark:bg-indigo-400',
+  [Categories.Database]: 'bg-red-400 dark:bg-red-500',
+  [Categories.DevopsTool]: 'bg-orange-300 dark:bg-orange-300',
+  [Categories.Testing]: 'bg-orange-300 dark:bg-orange-300',
+  [Categories.SecurityClearance]: 'bg-slate-300 dark:bg-slate-600',
+  [Categories.EducationLevel]: 'bg-yellow-300 dark:bg-yellow-200',
+  [Categories.DegreeField]: 'bg-yellow-300 dark:bg-yellow-200',
+  [Categories.Compensation]: 'bg-emerald-400 dark:bg-emerald-300',
+  [Categories.Benefits]: 'bg-emerald-400 dark:bg-emerald-300',
+  [Categories.WorkArrangement]: 'bg-sky-300 dark:bg-sky-500',
+  [Categories.EmploymentType]: 'bg-sky-300 dark:bg-sky-500',
+  [Categories.PerksCulture]: 'bg-sky-300 dark:bg-sky-500'
+}
+
 export type GroupedTags = Record<Categories, string[]>;
 
 export interface CategoryBadge {

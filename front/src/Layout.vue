@@ -19,9 +19,9 @@ import {
 </script>
 <template>
 
-  <Sidebar class="lg:px-4 lg:pl-2 lg:pb-0">
-    <header class="p-3 h-[var(--app-header-height)] flex items-center justify-between z-0">
-      <SidebarTrigger variant="outline" class="p-4.5 dark:text-stone-300 text-stone-950"/>
+  <Sidebar class="">
+    <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
+      <SidebarTrigger variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
       <Settings/>
     </header>
 

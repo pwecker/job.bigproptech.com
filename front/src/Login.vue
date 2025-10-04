@@ -186,7 +186,5 @@ import {
 </div>
 </template>
 <style>
-.grecaptcha-badge {
-  z-index: 999;
-}
+.grecaptcha-badge { display: none }
 </style>

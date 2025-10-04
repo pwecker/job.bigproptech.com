@@ -12,11 +12,12 @@ const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: n
 const watchers = ref<(() => void)[]>([])
 
 // rows' lines
-const rowHeight = ref(window.innerWidth < 769 ? 105 : 85);
-const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
+const rowHeight = ref(window.innerWidth < 769 ? 111 : 87);
+// const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
 
 let resizeTimeout: NodeJS.Timeout;
 
+// todo: better than timeout?
 const handleResize = () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
@@ -65,23 +66,21 @@ ModuleRegistry.registerModules([
 ])
 
 // ag grid attributes
-const rowData = ref<ListData[] | null>(null);
+const rowData = ref<ListData[] | null>(null)
 const rowModelType = ref<RowModelType>('infinite')
-const cacheBlockSize = ref(LIST_PAGE_SIZE);
-const cacheOverflowSize = ref(2);
-const maxConcurrentDatasourceRequests = ref(2);
-const infiniteInitialRowCount = ref(1);
-const maxBlocksInCache = ref(2);
+const cacheBlockSize = ref(LIST_PAGE_SIZE)
+const cacheOverflowSize = ref(2)
+const maxConcurrentDatasourceRequests = ref(2)
+const infiniteInitialRowCount = ref(1)
+const maxBlocksInCache = ref(2)
+const pagination = ref(false)
 const getRowId = ref<GetRowIdFunc>((params: GetRowIdParams) => {
   return params.data.documentId;
 });
 
 // ag grid values
-
-
-// import { UseGodCol } from '@/composables/useGodCol'
-// const { godCollVal } = UseGodCol()
 import GodCell from './God.vue'
+
 // ag grid columns
 import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
 const defaultColDef = {
@@ -91,11 +90,12 @@ const colDefs = computed<ColDef[]>(() => [
   {
     wrapText: true,
     cellStyle: { 
-      'white-space': 'normal',
-      'line-height': '23px',
-      height: `${rowHeight.value - (2 * rowPadding.value)}px`,
-      paddingTop: `${rowPadding.value}px`,
-      overflow: 'hidden'
+      // 'white-space': 'normal',
+      // 'line-height': '23px',
+      // height: `${rowHeight.value - (2 * rowPadding.value)}px`,
+      paddingTop: `3px`,
+      paddingBottom: `3px`,
+      // overflow: 'hidden'
     },
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
@@ -104,12 +104,16 @@ const colDefs = computed<ColDef[]>(() => [
 ])
 
 // ag grid datasource
+
+// page number
+const startNumber = ref(0)
+const endNumber = ref(LIST_PAGE_SIZE as number)
+const lastNumberString = ref('More')
 import { shallowRef } from 'vue'
 import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams } from 'ag-grid-community'
 import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
 const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {
-  
 
   gridApi.value = params.api;
   
@@ -132,11 +136,16 @@ const onGridReady = async (params: GridReadyEvent) => {
           await fetchPage(page)
           last = meta.value.pagination.total
         } else {
+          
           const more = await nextPage()
           if (!more) {
             last = data.length
           }
         }
+
+        startNumber.value = start
+        endNumber.value = last > 0 && last < end ? last : end
+        if (last >= 0) lastNumberString.value = last.toString()
 
         const rows = data.slice(start, end) ?? []
         gridParams.successCallback(rows, last)
@@ -242,7 +251,7 @@ onUnmounted(() => {
     :maxConcurrentDatasourceRequests="maxConcurrentDatasourceRequests"
     :infiniteInitialRowCount="infiniteInitialRowCount"
     :maxBlocksInCache="maxBlocksInCache"
-    :pagination="true"
+    :pagination="pagination"
     :paginationPageSize="LIST_PAGE_SIZE"
     :getRowId="getRowId"
     :rowData="rowData"
@@ -252,6 +261,9 @@ onUnmounted(() => {
     @grid-ready="onGridReady"
     @row-clicked="onRowClicked"
   />
+  <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
+    {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}
+  </div>
 </template>
 <style scoped>
 :deep(.row-interacted) {
@@ -259,11 +271,20 @@ onUnmounted(() => {
 }
 :deep(.ag-paging-panel) {
   font-size: var(--ag-pagination-font-size);
-  height: 4.2em;
+  height: var(--app-footer-height);
 }
 :deep(.ag-paging-panel) {
   gap: 0;
   justify-content: space-between;
+}
+:deep(.ag-paging-page-size) {
+  display: flex;
+  align-items: center;
+  height:  var(--app-footer-height);
+}
+:deep(.ag-picker-collapsed) {
+  min-height:  2.5em;
+  height:  2.5em;
 }
 
 </style>

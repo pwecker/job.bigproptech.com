@@ -45,7 +45,13 @@
 }
 
 :root {
-  --app-header-height: 4rem;
+  --app-header-height: 3.5em;
+  --app-footer-height: 2.5em;
+
+  --app-xs-spacing : 0.35em;
+  --app-sm-spacing : 1em;
+  --app-md-spacing : 1.5em;
+  --app-lg-spacing : 2em;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

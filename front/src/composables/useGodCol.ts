@@ -1,8 +1,13 @@
 import { type ListData } from '@/composables/useFullApi'
 
-export const UseGodCol = () => {
+interface useGodColReturn {
+  godCollVal(data: ListData): string
+  relativeDateLabel(utcString: string): string
+}
 
-  function relativeDateLabel(utcString: string): string {
+export const UseGodCol = (): useGodColReturn => {
+
+  function relativeDateLabel(utcString: string) {
     const inputDate = new Date(utcString)
     if (isNaN(inputDate.getTime())) {
       throw new Error(`Invalid date string: ${utcString}`)
@@ -49,6 +54,7 @@ export const UseGodCol = () => {
     `
   }
   return {
-    godCollVal
+    godCollVal,
+    relativeDateLabel
   }
 }

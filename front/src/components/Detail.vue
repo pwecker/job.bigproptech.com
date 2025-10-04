@@ -4,10 +4,11 @@ interface Props {
   documentId: string
 }
 
-// shared resource
+// single resource
 const props = defineProps<Props>()
 import { getSingleData } from '@/composables/useDetailApi'
 const { data, loading, error } = getSingleData(props.documentId)
+
 
 // error watching
 import { useRouter } from 'vue-router'
@@ -22,29 +23,45 @@ watch(error, (newError) => {
   }
 }, { immediate: true })
 
-// formatting
-import { ref, computed } from "vue"
-const salaryDisplay = computed(() => {
-  if (!data.value) return ""
-  const min = data.value.job_min_salary?.toLocaleString() || ""
-  const max = data.value.job_max_salary?.toLocaleString() || ""
-  return min && max
-    ? `$${min} - $${max} / ${data.value.job_salary_period}`
-    : min
-      ? `$${min} / ${data.value.job_salary_period}`
-      : "Not specified"
+// relative date
+import { computed, ref } from 'vue'
+import { UseGodCol } from '@/composables/useGodCol'
+const { relativeDateLabel } = UseGodCol()
+const age = computed(() => {
+  if (!data.value) return null
+  return relativeDateLabel(data.value.job_posted_at_datetime_utc || data.value.updatedAt)
 })
 
-const showFullDescription = ref(false)
+// highlights
+const highlights = computed(() => {
+  if (data.value === null) return null
+  if (Array.isArray(data.value.job_highlights)) {
+    return data.value.job_highlights.join('<br />')
+  }
 
-const truncatedDescription = computed(() => {
-  if (!data.value) return ""
-  const desc = data.value.job_description || ""
-  if (desc.length <= 500 || showFullDescription.value) return desc
-  return desc.slice(0, 500) + "..."
+  return data.value.job_highlights
 })
+
+// categories
+import { type TagDoc } from '@/composables/useFullApi'
+import { Categories, type CategorySet, categoryColors } from '@/composables/useTagApi'
+const categories = computed(() => {
+  if (data.value === null) return null
+  const tags: TagDoc[] | undefined = data.value.tags
+  if (!tags) return null
+
+  return tags.reduce((acc: any, current: any) => {
+    const { category, value } = current
+    acc[category] = acc[category] || []
+    acc[category].push(value)
+    return acc
+  }, {})
+});
 
 // components
+import { CircleX, CircleCheck, X } from 'lucide-vue-next'
+
+import { Button } from './ui/button'
 import {
   Card,
   CardContent,
@@ -52,106 +69,90 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { CalendarDays, MapPin, Globe, DollarSign, CheckCircle2 } from 'lucide-vue-next'
+} from '@/components/ui/card'
 </script>
-
 <template>
-  <div class="w-full h-full flex items-start justify-center">
-    <div v-if="loading"></div>
-    <div v-else-if="error" class="w-full h-full flex justify-center items-center">
-      <Card @click.stop="" class="w-full max-w-4xl shadow-lg rounded-2xl flex">
-        <CardHeader class="flex flex-row items-center justify-center gap-4">
-          Error: {{ error }}
-        </CardHeader>
-      </Card>
-    </div>
-    <Card @click.stop="" v-else-if="data" class="w-full max-w-4xl shadow-lg rounded-2xl">
-      <!-- header -->
-      <CardHeader class="flex flex-row items-center gap-4">
-        <img
-          v-if="data.employer_logo"
-          :src="data.employer_logo"
-          alt="logo"
-          class="w-16 h-16 object-contain rounded-lg border"
-        />
-        <div>
-          <CardTitle class="text-2xl font-bold leading-11">{{ data.job_title }}</CardTitle>
-          <CardDescription>
-            {{ data.employer_name }}
-            <span v-if="data.job_employment_type" class="ml-2">
-              <Badge variant="secondary">{{ data.job_employment_type }}</Badge>
+  <div class="w-full h-full flex items-center justify-center">
+    <div @click.stop="" class="relative p-[var(--app-md-spacing)] pb-1 border-accent border-1 transition-[width] flex flex-col justify-between bg-popover w-[50vh] h-[80vh] landscape:w-[130vh] landscape:h-[80vh] max-w-[600px] max-h-[970px] landscape:max-w-[970px] landscape:max-h-[600px] shadow-lg">
+      
+      <!-- close -->
+      <X :size="36" @click="router.push('/')" class="rounded-lg transition-colors cursor-pointer p-[var(--app-xs-spacing)] absolute top-[var(--app-xs-spacing)] right-[var(--app-xs-spacing)] text-primary hover:text-primary hover:bg-muted/30"/>
+      
+      <div class="portrait:grid-rows-[auto_auto_auto_minmax(0,1fr)_auto] grid grid-cols-5 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-y-[var(--app-sm-spacing)] w-full h-full">
+        <div class="row-start-1 col-start-1 col-span-4 row-span-1">
+
+          <!-- age, type -->
+          <div class="text-base font-light flex gap-[var(--app-xs-spacing)] -ml-0.5"><span>[ {{ age }} ]</span><span>{{ data?.job_employment_type }}</span></div>
+          <!-- title -->
+          <div class="text-base">{{ data?.job_title }}</div>
+          <!-- company, location -->
+          <div class="flex items-center text-base font-light">
+            <span>{{ data?.employer_name }}</span>
+              <div class="w-[3px] h-[3px] rounded-sm mx-0.5 bg-primary"></div>
+            <span>{{ data?.job_location }}</span>
+          </div>
+
+        </div>
+        <div class="row-start-2 col-start-1 col-span-4 row-span-1">
+  
+          <!-- categories -->
+          <div class="grow flex flex-wrap gap-x-2 font-light dark:font-light uppercase tracking-wide">
+            <span class="flex items-center" v-for="(group, name) in categories as CategorySet">
+              <div class="w-1.5 h-1.5 rounded-sm mx-0.5 mr-1" :class="[categoryColors[name as Categories]]"></div>
+              <template v-for="(word, index) in group" :key="index">
+                <span class="text-base tracking-wide whitespace-nowrap">{{ word }}<span v-if="index < (group.length ?? 0) - 1">,</span></span>
+              </template>
             </span>
-          </CardDescription>
-        </div>
-      </CardHeader>
-
-      <!-- content -->
-      <CardContent class="space-y-4">
-        <!-- location and info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-          <div class="flex items-center gap-2">
-            <MapPin class="w-4 h-4" />
-            <span>{{ data.job_city }}, {{ data.job_state }}, {{ data.job_country }}</span>
-            <Badge v-if="data.job_is_remote" class="ml-2" variant="outline">Remote</Badge>
           </div>
-          <div class="flex items-center gap-2">
-            <CalendarDays class="w-4 h-4" />
-            <span>Posted: {{ new Date(data.job_posted_at_datetime_utc).toLocaleDateString() }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <DollarSign class="w-4 h-4" />
-            <span>{{ salaryDisplay }}</span>
-          </div>
-          <div v-if="data.employer_website" class="flex items-center gap-2">
-            <Globe class="w-4 h-4" />
-            <a :href="data.employer_website" target="_blank" class="underline">
-              Company Website
-            </a>
-          </div>
+
         </div>
+        <div class="portrait:row-start-3 portrait:col-start-1 portrait:row-span-1 row-start-1 col-start-5 col-span-5 row-span-3">
 
-        <!-- description -->
-        <div>
-          <h3 class="text-lg font-semibold mb-2">Job Description</h3>
-          <p class="text-sm leading-relaxed whitespace-pre-line">{{ truncatedDescription }}</p>
-          <button
-            v-if="data.job_description && data.job_description.length > 500"
-            class="text-blue-600 hover:underline mt-2 text-sm"
-            @click="showFullDescription = !showFullDescription"
-          >
-            {{ showFullDescription ? "Show less" : "Read more" }}
-          </button>
+          <!-- apply options -->
+          <div class="pt-[var(--app-xs-spacing)] portrait:p-0 flex portrait:flex-row overflow-x-auto flex-col">
+            <div v-for="option in data?.apply_options" class="text-base font-light">
+              <a @click.stop="" class="w-full whitespace-nowrap" :href="option.apply_link" >[ {{ option.publisher }} ]</a>
+            </div>
+          </div>
+
         </div>
+        <div class="portrait:row-start-4 row-start-3 col-start-1 col-span-3 row-span-1">
 
-        <!-- highlights -->
-        <div v-if="data.job_highlights">
-          <h3 class="text-lg font-semibold mb-2">Highlights</h3>
-          <ul class="list-none space-y-1">
-            <li v-for="(items, key) in data.job_highlights" :key="key">
-              <span class="font-medium capitalize">{{ key }}:</span>
-              <ul class="ml-4 mt-1 space-y-1">
-                <li v-for="item in items" :key="item" class="flex items-center gap-2">
-                  <CheckCircle2 class="w-4 h-4 text-green-600" />
-                  <span>{{ item }}</span>
-                </li>
-              </ul>
-            </li>
-          </ul>
+          <!-- description -->
+          <div class="text-base pr-4 flex flex-col h-full">
+            <div class="shrink-0 mb-2 font-light" v-if="data?.job_description">Description</div>
+            <div class="flex-1 overflow-auto font-light dark:font-light">{{ data?.job_description }}</div>
+          </div>
+
         </div>
-      </CardContent>
+        <div class="portrait:row-start-4 row-start-3 col-start-4 col-span-2 row-span-1">
 
-      <!-- footer -->
-      <CardFooter class="flex justify-between items-center">
-        <span class="text-sm text-muted-foreground">Published by {{ data.job_publisher }}</span>
-        <Button as="a" :href="data.job_apply_link" target="_blank" size="lg">
-          Apply Now
-        </Button>
-      </CardFooter>
-    </Card>
+          <!-- highlights -->
+          <div class="text-base pr-4 flex flex-col h-full">
+            <div class="shrink-0 mb-2 font-light" v-if="highlights">Highlights</div>
+            <div class="flex-1 overflow-auto font-light dark:font-light">
+              <span v-for="(highlight, section) of data?.job_highlights">
+                <div>{{ section }}</div>
+                <div v-html="highlight"></div>
+              </span>
+            </div>
+          </div>
 
-    <div v-else>No data found</div>
+        </div>
+        <div class="portrait:row-start-5 row-start-4 col-start-1 col-span-5 row-span-1">
+
+          <!-- interaction -->
+          <div class="w-full flex items-center justify-center">
+            <div class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg">
+              <CircleCheck class="" :size="36" />
+            </div>
+            <div class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg">
+              <CircleX :size="36"/>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </template>
