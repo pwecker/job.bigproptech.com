@@ -2,8 +2,7 @@
 import Icon from '@/components/Icon.vue'
 import CategoryBadges from '@/components/Categories.vue'
 
-// unmount
-import { onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 if (import.meta.hot) {
   if (!import.meta.hot.data.gridState) {
     import.meta.hot.data.gridState = { gridApi: null, watchers: [] }
@@ -11,6 +10,27 @@ if (import.meta.hot) {
 }
 const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: null, watchers: [] }
 const watchers = ref<(() => void)[]>([])
+
+// rows' lines
+const rowHeight = ref(window.innerWidth < 769 ? 105 : 85);
+const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
+
+let resizeTimeout: NodeJS.Timeout;
+
+const handleResize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    const newHeight = window.innerWidth < 769 ? 105 : 85;
+    if (newHeight !== rowHeight.value) {
+      rowHeight.value = newHeight;
+    }
+  }, 150);
+};
+
+// mount
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+})
 
 // data
 import { ref } from 'vue'
@@ -34,8 +54,9 @@ import { useAgGridTheme } from '@/composables/useAgGridTheme'
 const { currentTheme } = useAgGridTheme()
 
 // ag grid module
-import { ModuleRegistry, RowStyleModule, RenderApiModule, InfiniteRowModelModule, PaginationModule, ValidationModule, type RowModelType, type GetRowIdFunc, type GetRowIdParams } from 'ag-grid-community'
+import { ModuleRegistry, RowStyleModule, RenderApiModule, InfiniteRowModelModule, PaginationModule, CellStyleModule, ValidationModule, type RowModelType, type GetRowIdFunc, type GetRowIdParams } from 'ag-grid-community'
 ModuleRegistry.registerModules([
+  CellStyleModule,
   RowStyleModule,
   RenderApiModule,
   PaginationModule,
@@ -55,66 +76,30 @@ const getRowId = ref<GetRowIdFunc>((params: GetRowIdParams) => {
   return params.data.documentId;
 });
 
+// ag grid values
+
+
+// import { UseGodCol } from '@/composables/useGodCol'
+// const { godCollVal } = UseGodCol()
+import GodCell from './God.vue'
 // ag grid columns
 import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
 const defaultColDef = {
   flex: 1
 }
-const colDefs = ref<ColDef[]>([
+const colDefs = computed<ColDef[]>(() => [
   {
-    headerComponent: Icon,
-    headerComponentParams: { icon: Star },
-    maxWidth: 75,
-    cellRenderer: Icon,
-    valueGetter: (params) => {
-      if(!params.data) return ''
-      return getInteractionStatus(params.data.documentId).value.flavor
+    wrapText: true,
+    cellStyle: { 
+      'white-space': 'normal',
+      'line-height': '23px',
+      height: `${rowHeight.value - (2 * rowPadding.value)}px`,
+      paddingTop: `${rowPadding.value}px`,
+      overflow: 'hidden'
     },
-    cellRendererParams: (params: ICellRendererParams) => {
-      if (params.value === '') return { icon: null }
-      if (params.value === 'like') return { icon: CircleCheck }
-      if (params.value === 'dislike') return { icon: CircleX }
-    }
-  },
-  {
-    headerComponent: Icon,
-    headerComponentParams: { icon: Timer },
-    maxWidth: 100,
-    valueGetter: (params) => {
-      if(!params.data) return ''
-      return params.data.job_posted_at_datetime_utc || params.data.updatedAt
-    },
-    valueFormatter: params => (params.value ? timeAgo(params.value) : '')
-  },
-  {
-    headerComponent: Icon,
-    headerComponentParams: { icon: MapPinned },
-    maxWidth: 200,
-    valueGetter: (params) => {
-      if(!params.data) return ''
-      return params.data.job_location
-    },
-    valueFormatter: params => params.value
-  },
-  {
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
-    flex: 2,
-    valueGetter: (params) => {
-      if(!params.data) return ''
-      return params.data.job_title
-    },
-    valueFormatter: params => params.value
-  },
-  {
-    headerComponent: Icon,
-    headerComponentParams: { icon: Tags },
-    flex: 3,
-    valueGetter: (params) => {
-      if(!params.data) return []
-      return params.data.tags
-    },
-    cellRenderer: CategoryBadges
+    cellRenderer: GodCell,
   }
 ])
 
@@ -124,8 +109,10 @@ import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParam
 import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
 const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {
+  
 
   gridApi.value = params.api;
+  
   if (import.meta.hot) {
     gridState.gridApi = gridApi.value
   }
@@ -133,7 +120,6 @@ const onGridReady = async (params: GridReadyEvent) => {
 
   const updateData = (data: ListData[]) => {
 
-    // todo hmr broke
     const dataSource: IDatasource = {
       rowCount: undefined,
       getRows: async (gridParams: IGetRowsParams) => {
@@ -179,6 +165,7 @@ const onGridReady = async (params: GridReadyEvent) => {
 };
 
 // row interaction
+// todo: return from higher up pipeline
 import { useInteractedData } from '@/composables/useInteractions'
 const { getInteractionStatus } = useInteractedData<ListData>(data, { getDataId: (item) => item.documentId })
 import type { RowClassRules } from 'ag-grid-community'
@@ -211,24 +198,6 @@ const unwatch = watch(() => [interactionsLength.value, interactionsData.value] a
 })
 watchers.value.push(unwatch)
 
-// formatting
-function timeAgo(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''}`
-  
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''}`
-  
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  if (diffMinutes > 0) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`
-  
-  return 'just now'
-}
-
 // click out
 import type { RowClickedEvent } from 'ag-grid-community'
 import { useRouter } from 'vue-router'
@@ -237,7 +206,10 @@ const onRowClicked = (event: RowClickedEvent) => {
   router.push(`/${event.data.documentId}`)
 }
 
+// unmount
 onUnmounted(() => {
+  clearTimeout(resizeTimeout);
+  window.removeEventListener('resize', handleResize);
   watchers.value.forEach(unwatch => unwatch())
   watchers.value = []
 
@@ -276,16 +248,22 @@ onUnmounted(() => {
     :rowData="rowData"
     :rowClassRules="rowClassRules"
     :suppressCellFocus="true"
+    :rowHeight="rowHeight"
     @grid-ready="onGridReady"
     @row-clicked="onRowClicked"
   />
 </template>
 <style scoped>
 :deep(.row-interacted) {
-  color: var(--muted);
-  user-select: none
+  user-select: none;
 }
 :deep(.ag-paging-panel) {
-  font-size: var(--ag-pagination-font-size)
+  font-size: var(--ag-pagination-font-size);
+  height: 4.2em;
 }
+:deep(.ag-paging-panel) {
+  gap: 0;
+  justify-content: space-between;
+}
+
 </style>

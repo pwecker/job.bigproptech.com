@@ -42,11 +42,11 @@ import {
           <!-- likes -->
            <template #liked="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel>{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-thin text-sm">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem v-for="i in items" :key="`likes:${i.documentId}`">
-                    <SidebarMenuButton>
+                    <SidebarMenuButton size="sm" class="font-light text-sm">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -59,11 +59,11 @@ import {
           <!-- recent -->
           <template #recent="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel>{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-thin text-sm">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem v-for="i in items" :key="`recent:${i.documentId}`">
-                    <SidebarMenuButton>
+                    <SidebarMenuButton size="sm" class="font-light text-sm">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -76,7 +76,7 @@ import {
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter class="w-full flex flex-row justify-between items-center p-0 pl-3 pb-4">
+      <SidebarFooter class="w-full flex flex-row justify-between items-center p-0 pl-3 py-1">
         <Button
           class="cursor-pointer"
           variant="outline"
@@ -85,7 +85,7 @@ import {
         >
           <LogOut/>
         </Button>
-        <div class="overflow-hidden truncate">{{ authStore.user?.username || 'Guest' }}</div>
+        <div class="overflow-hidden truncate text-xs font-thin tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
         <Button
           class="cursor-pointer"
           variant="outline"

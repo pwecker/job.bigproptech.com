@@ -28,6 +28,7 @@ export interface ListData {
   employer_name: string
   job_posted_at_datetime_utc: string | null
   job_is_remote: boolean
+  job_description: string
   tags?: TagDoc[]
 }
 
@@ -55,7 +56,8 @@ const LIST_DATA_OPTIONS: StrapiQueryOptions = {
     'job_posted_at_datetime_utc',
     'job_location',
     'employer_name',
-    'job_is_remote'
+    'job_is_remote',
+    'job_description'
   ],
   pagination: { page: 1, pageSize: LIST_PAGE_SIZE },
   // filters: { tags: { $notNull: true } },

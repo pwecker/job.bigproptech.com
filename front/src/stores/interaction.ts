@@ -155,6 +155,7 @@ export function useInteractionData(): InteractionDataReturn {
     const existingDb = data.value?.find(i => i.datum.documentId === datumId)
   
     try {
+      if (!flavor) throw new Error('Flavor can\'t be undefined')
       if (existingDb) {
         const updated = await resource.update(
           existingDb.documentId,

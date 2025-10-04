@@ -9,10 +9,11 @@ export const useAgGridTheme = () => {
   const isDark = computed(() => (ux.isDark ? true : false))
   
   const baseThemeParams = computed(() => ({
+    fontFamily: 'RobotoCondensed',
     backgroundColor: `var(--background)`,
     headerBackgroundColor: `var(--background)`,
     headerTextColor: `var(--muted-foreground)`,
-    rowHoverColor: `var(--primary-foreground)`,
+    rowHoverColor: `var(--primary-foreground)`
   }))
   
   const currentTheme = computed(() => {

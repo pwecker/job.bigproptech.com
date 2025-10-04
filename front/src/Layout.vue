@@ -13,14 +13,13 @@ const { isTeased, isAuthenticated } = storeToRefs(authStore)
 import Login from '@/Login.vue'
 import Sidebar from '@/Sidebar.vue'
 import Settings from '@/Settings.vue'
-// import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 </script>
 <template>
 
-  <Sidebar class="lg:px-4 lg:pl-2 lg:pb-3">
+  <Sidebar class="lg:px-4 lg:pl-2 lg:pb-0">
     <header class="p-3 h-[var(--app-header-height)] flex items-center justify-between z-0">
       <SidebarTrigger variant="outline" class="p-4.5 dark:text-stone-300 text-stone-950"/>
       <Settings/>
