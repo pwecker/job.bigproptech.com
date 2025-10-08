@@ -12,7 +12,7 @@ const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: n
 const watchers = ref<(() => void)[]>([])
 
 // rows' lines
-const rowHeight = ref(window.innerWidth < 769 ? 111 : 87);
+const rowHeight = ref(window.innerWidth < 769 ? 119 : 95);
 // const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
 
 let resizeTimeout: NodeJS.Timeout;
@@ -21,7 +21,7 @@ let resizeTimeout: NodeJS.Timeout;
 const handleResize = () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    const newHeight = window.innerWidth < 769 ? 105 : 85;
+    const newHeight = window.innerWidth < 769 ? 119 : 95;
     if (newHeight !== rowHeight.value) {
       rowHeight.value = newHeight;
     }
@@ -93,8 +93,8 @@ const colDefs = computed<ColDef[]>(() => [
       // 'white-space': 'normal',
       // 'line-height': '23px',
       // height: `${rowHeight.value - (2 * rowPadding.value)}px`,
-      paddingTop: `3px`,
-      paddingBottom: `3px`,
+      // paddingTop: `3px`,
+      // paddingBottom: `3px`,
       // overflow: 'hidden'
     },
     headerComponent: Icon,
@@ -269,6 +269,10 @@ onUnmounted(() => {
 :deep(.row-interacted) {
   user-select: none;
 }
+:deep(.ag-row) {
+  border-style: dashed;
+  padding-top: calc(var(--app-sm-spacing) / 2);
+}
 :deep(.ag-paging-panel) {
   font-size: var(--ag-pagination-font-size);
   height: var(--app-footer-height);
@@ -286,5 +290,4 @@ onUnmounted(() => {
   min-height:  2.5em;
   height:  2.5em;
 }
-
 </style>

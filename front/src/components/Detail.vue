@@ -1,14 +1,14 @@
 <script setup lang="ts">
 
 interface Props {
-  documentId: string
+  documentId: string | null
 }
 
 // single resource
 const props = defineProps<Props>()
+import { computed } from 'vue'
 import { getSingleData } from '@/composables/useDetailApi'
-const { data, loading, error } = getSingleData(props.documentId)
-
+const { data, loading, error } = props.documentId ? getSingleData(props.documentId) : { data: ref(null), loading: ref(false), error: ref(null) }
 
 // error watching
 import { useRouter } from 'vue-router'
@@ -24,7 +24,7 @@ watch(error, (newError) => {
 }, { immediate: true })
 
 // relative date
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { UseGodCol } from '@/composables/useGodCol'
 const { relativeDateLabel } = UseGodCol()
 const age = computed(() => {
@@ -58,9 +58,20 @@ const categories = computed(() => {
   }, {})
 });
 
+// interaction
+import { defineEmits } from 'vue';
+import { type InteractionFlavor } from '@/stores/interaction'
+const emit = defineEmits<{ (e: 'interaction', payload: { documentId: string, jobTitle: string, flavor: InteractionFlavor }): void }>();
+
+// const handleInteraction = (documentId: string, jobTitle: string, flavor: InteractionFlavor) => {
+//   queueInteraction(documentId, jobTitle, flavor)
+//   // router.push({ path: '/' })
+//   emit('interaction')
+// }
+
 // components
 import { CircleX, CircleCheck, X } from 'lucide-vue-next'
-
+import Loading from './Loading.vue'
 import { Button } from './ui/button'
 import {
   Card,
@@ -72,13 +83,14 @@ import {
 } from '@/components/ui/card'
 </script>
 <template>
-  <div class="w-full h-full flex items-center justify-center">
-    <div @click.stop="" class="relative p-[var(--app-md-spacing)] pb-1 border-accent border-1 transition-[width] flex flex-col justify-between bg-popover w-[50vh] h-[80vh] landscape:w-[130vh] landscape:h-[80vh] max-w-[600px] max-h-[970px] landscape:max-w-[970px] landscape:max-h-[600px] shadow-lg">
+
+    <div @click.stop="" class="p-[var(--app-md-spacing)] relative w-full h-full border-accent border-1 transition-[width] flex flex-col justify-between bg-popover shadow-lg">
       
       <!-- close -->
       <X :size="36" @click="router.push('/')" class="rounded-lg transition-colors cursor-pointer p-[var(--app-xs-spacing)] absolute top-[var(--app-xs-spacing)] right-[var(--app-xs-spacing)] text-primary hover:text-primary hover:bg-muted/30"/>
       
-      <div class="portrait:grid-rows-[auto_auto_auto_minmax(0,1fr)_auto] grid grid-cols-5 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-y-[var(--app-sm-spacing)] w-full h-full">
+      <Loading v-if="loading" />
+      <div v-else-if="documentId" class="portrait:grid-rows-[auto_auto_auto_minmax(0,1fr)_auto] grid grid-cols-5 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-y-[var(--app-sm-spacing)] w-full h-full">
         <div class="row-start-1 col-start-1 col-span-4 row-span-1">
 
           <!-- age, type -->
@@ -143,10 +155,18 @@ import {
 
           <!-- interaction -->
           <div class="w-full flex items-center justify-center">
-            <div class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg">
+            <div 
+              @click="data?.documentId && data?.job_title && emit('interaction', { documentId: data.documentId, jobTitle: data.job_title, flavor: 'like' })" 
+              class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg"
+              :class="{ 'pointer-events-none opacity-50': !data?.documentId || !data?.job_title }"
+            >
               <CircleCheck class="" :size="36" />
             </div>
-            <div class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg">
+            <div 
+              @click="data?.documentId && data?.job_title && emit('interaction', { documentId: data.documentId, jobTitle: data.job_title, flavor: 'dislike' })" 
+              class="transition-colors cursor-pointer p-[var(--app-xs-spacing)] bg-popover text-primary hover:text-primary hover:bg-muted/30 rounded-lg"
+              :class="{ 'pointer-events-none opacity-50': !data?.documentId || !data?.job_title }"
+            >
               <CircleX :size="36"/>
             </div>
           </div>
@@ -154,5 +174,5 @@ import {
         </div>
       </div>
     </div>
-  </div>
+
 </template>

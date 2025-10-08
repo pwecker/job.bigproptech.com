@@ -47,7 +47,7 @@ const router = createRouter({
           name: 'carousel',
           components: {
             default: () => import('@/components/Grid.vue'),
-            overlay: () => import('@/components/Carousel.vue')
+            overlay: () => import('@/components/Stack.vue')
           }
         }
       ],

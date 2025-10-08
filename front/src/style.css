@@ -52,6 +52,7 @@
   --app-sm-spacing : 1em;
   --app-md-spacing : 1.5em;
   --app-lg-spacing : 2em;
+  --app-xl-spacing : 4em;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

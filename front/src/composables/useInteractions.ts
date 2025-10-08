@@ -11,7 +11,7 @@ export interface InteractedDataOptions<T> {
   getDataId: (item: T) => string
   filter?: (item: InteractedDataItem<T>) => boolean
   limit?: number
-  center?: number
+  center?: Ref<number | undefined>
 }
 
 export interface InteractedDataReturn<T> {
@@ -47,14 +47,15 @@ export function useInteractedData<T>(
     if (validItems.length === 0) return null
     
     const uninteractedItems: InteractedDataItem<T>[] = []
+    const centerIndex = center?.value ?? -1 
     
-    if (center !== undefined && center >= 0 && center < validItems.length) {
+    if (centerIndex !== undefined && centerIndex >= 0 && centerIndex < validItems.length) {
       // Target-based search: look around the target index
       const maxDistance = Math.max(validItems.length, limit * 2)
       
       for (let distance = 0; distance <= maxDistance && uninteractedItems.length < limit; distance++) {
         // Check positions at increasing distances from target
-        const positions = distance === 0 ? [center] : [center - distance, center + distance]
+        const positions = distance === 0 ? [centerIndex] : [centerIndex - distance, centerIndex + distance]
         
         for (const pos of positions) {
           if (uninteractedItems.length >= limit) break
@@ -103,7 +104,6 @@ export function useInteractedData<T>(
       }
     }
     
-    // Guarantee the exact limit length by repeating items if necessary
     if (uninteractedItems.length === 0) {
       return null
     }

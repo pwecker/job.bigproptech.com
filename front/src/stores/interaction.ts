@@ -3,17 +3,21 @@ import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
-import { type ListData } from '@/composables/useFullApi'
 
 export type InteractionFlavor = 'like' | 'dislike' | 'seen'
 
 export interface Interaction {
   documentId: string
   flavor: InteractionFlavor
-  datum: ListData
+  datum: InteractionDatum
   createdAt?: string
   updatedAt?: string
   isPending?: boolean
+}
+
+export interface InteractionDatum {
+  documentId: string
+  job_title: string
 }
 
 export interface InteractionInput {
@@ -30,7 +34,7 @@ export interface InteractionDataReturn {
   refetch: (options?: { headers?: Record<string, string> }) => Promise<Interaction[] | null>
   getFlavor: (datumId: string) => InteractionFlavor | null
   setInteraction: (datumId: string, flavor: InteractionFlavor) => Promise<void>
-  queueInteraction: (datum: ListData, flavor: InteractionFlavor) => void
+  queueInteraction: (datumId: string, jobTitle: string, flavor: InteractionFlavor) => void
   flushPendingInteractions: () => Promise<void>
   hydrateResource: () => void
   waitForHydration: () => Promise<void>
@@ -186,18 +190,17 @@ export function useInteractionData(): InteractionDataReturn {
     }
   }
 
-  // todo: make: datumId: string, flavor: InteractionFlavor vv
-  function queueInteraction(datum: ListData, flavor: InteractionFlavor) {
-    const existingPending = pendingInteractions.value.find(p => p.datum.documentId === datum.documentId)
+  function queueInteraction(datumId: string, jobTitle: string, flavor: InteractionFlavor) {
+    const existingPending = pendingInteractions.value.find(p => p.datum.documentId === datumId)
     if (existingPending) {
-      existingPending.documentId = `pending:${flavor}:${datum.documentId}`
+      existingPending.documentId = `pending:${flavor}:${datumId}`
       existingPending.flavor = flavor
     } else {
-      pendingInteractions.value.push({ documentId: `pending:${flavor}:${datum.documentId}`, datum, flavor })
+      pendingInteractions.value.push({ documentId: `pending:${flavor}:${datumId}`, datum: { documentId: datumId, job_title: jobTitle }, flavor })
     }
   
     if (authStore.jwt) {
-      void setInteraction(datum.documentId, flavor)
+      void setInteraction(datumId, flavor)
     }
   }
 

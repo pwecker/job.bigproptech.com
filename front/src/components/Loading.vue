@@ -1,5 +1,7 @@
 <template>
-  <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+  <div class="w-full h-full flex items-center justify-center">
+    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+  </div>
 </template>
 <style scope>
 .lds-ellipsis,

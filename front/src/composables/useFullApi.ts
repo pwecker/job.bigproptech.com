@@ -98,8 +98,6 @@ export function listData(authHeaders?: () => Record<string, string>): ListDataRe
     let needsFetch = !mergedData.value
     const slice = mergedData.value?.slice(startIndex, endIndex).filter(row => row) || []
     needsFetch = slice.length < endIndex - startIndex
-
-    console.log(meta.value?.pagination?.total)
     
     if (!needsFetch || meta.value?.pagination?.total && (slice.length + startIndex >= meta.value?.pagination?.total)) {
       return

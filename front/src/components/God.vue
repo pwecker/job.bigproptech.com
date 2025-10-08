@@ -77,16 +77,9 @@ import { Separator } from "@/components/ui/separator"
 
 </script>
 <template>
-  <div class="leading-[var(--app-md-spacing)] gap-x-1 pt-1 text-base w-full flex flex-wrap items-center justify-start">
-
+  <div :class="['!leading-[var(--app-md-spacing)]']" class="leading-[var(--app-md-spacing)] gap-x-1 pt-1 text-base w-full flex flex-wrap items-center justify-start">
     <!-- distance -->
     <span v-if="relativeDate" class="font-light mr-1">[{{ relativeDate }}]</span>
-    <!-- <Badge
-      class="-ml-2 h-[1rem] pr-2 pt-1 mr-0.5 font-light dark:font-thin text-[0.69rem] uppercase tracking-wider border-muted"
-      :class="interacted === 'dislike' ? 'text-muted-foreground bg-background' : 'text-primary bg-background'"
-    >
-      {{ relativeDate }}
-    </Badge> -->
 
     <!-- title -->
     <template v-for="(word, index) in title" :key="index">
@@ -98,20 +91,20 @@ import { Separator } from "@/components/ui/separator"
       class="ml-1 cursor-pointer h-full w-auto shrink-0"
       variant="ghost"
       size="icon"
-      @click.stop="interactionStore.setInteraction(params.data?.documentId, 'like')"
-    ><CircleCheck :class="interacted === 'like' ? 'text-primary' : 'text-muted-foreground'" /></Button>
+      @click.stop="interactionStore.queueInteraction(params.data?.documentId, params.data?.job_title, 'like')"
+    ><CircleCheck :class="interacted === 'like' ? 'text-primary' : 'text-muted'" /></Button>
     <Button
       class="mr-0.5 cursor-pointer h-full w-auto shrink-0.5"
       variant="ghost"
       size="icon"
-      @click.stop="interactionStore.setInteraction(params.data?.documentId, 'dislike')"
-    ><CircleX :class="interacted === 'dislike' ? 'text-primary' : 'text-primary'"/></Button>
+      @click.stop="interactionStore.queueInteraction(params.data?.documentId, params.data?.job_title, 'dislike')"
+    ><CircleX :class="interacted === 'dislike' ? 'text-primary' : 'text-muted'"/></Button>
 
     <!-- employer -->
     <span class="font-light dark:font-light" :class="interacted !== null ? 'text-primary' : 'text-primary'">{{ params.data?.employer_name }}</span>
 
     <!-- dot -->
-    <div class="w-[3px] h-[3px] rounded-sm mx-0.5" :class="interacted !== null ? 'bg-muted-foreground' : 'bg-primary'"></div>
+    <div class="w-[3px] h-[3px] rounded-sm mx-0.5" :class="interacted !== null ? 'bg-primary' : 'bg-primary'"></div>
 
     <!-- location -->
     <span class="font-light dark:font-light" :class="interacted !== null ? 'text-primary' : 'text-primary'">{{ params.data?.job_location }}</span>
@@ -133,7 +126,7 @@ import { Separator } from "@/components/ui/separator"
     </span>
 
     <!-- dot -->
-    <div class="w-[3px] h-[3px] rounded-sm" :class="interacted !== null ? 'bg-muted-foreground' : 'bg-primary'"></div>
+    <div class="w-[3px] h-[3px] rounded-sm" :class="interacted !== null ? 'bg-primary' : 'bg-primary'"></div>
 
     <!-- description -->
     <template v-for="(word, index) in description" :key="index">
