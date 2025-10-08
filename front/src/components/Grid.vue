@@ -90,12 +90,8 @@ const colDefs = computed<ColDef[]>(() => [
   {
     wrapText: true,
     cellStyle: { 
-      // 'white-space': 'normal',
-      // 'line-height': '23px',
-      // height: `${rowHeight.value - (2 * rowPadding.value)}px`,
-      // paddingTop: `3px`,
-      // paddingBottom: `3px`,
-      // overflow: 'hidden'
+      'clip-path': `inset(var(--app-xs-spacing) 0px var(--app-sm-spacing))`,
+      'padding-top': 'var(--app-xs-spacing)'
     },
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
@@ -271,7 +267,6 @@ onUnmounted(() => {
 }
 :deep(.ag-row) {
   border-style: dashed;
-  padding-top: calc(var(--app-sm-spacing) / 2);
 }
 :deep(.ag-paging-panel) {
   font-size: var(--ag-pagination-font-size);
