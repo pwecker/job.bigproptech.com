@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { defineProps, ref } from 'vue'
+import { ref } from 'vue'
 import type { IHeaderParams } from 'ag-grid-community'
 import { type LucideIcon } from 'lucide-vue-next'
 type CustomHeaderParams = IHeaderParams & { icon: LucideIcon }

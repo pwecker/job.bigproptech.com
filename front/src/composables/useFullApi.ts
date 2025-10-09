@@ -60,7 +60,7 @@ const LIST_DATA_OPTIONS: StrapiQueryOptions = {
     'job_description'
   ],
   pagination: { page: 1, pageSize: LIST_PAGE_SIZE },
-  // filters: { tags: { $notNull: true } },
+  filters: { tags: { $notNull: true } },
   sort: ['job_posted_at_datetime_utc:desc'],
   populate: ['tags']
 }

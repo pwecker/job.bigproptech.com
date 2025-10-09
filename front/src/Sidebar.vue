@@ -45,11 +45,11 @@ import {
           <!-- likes -->
            <template #liked="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel class="font-light text-base text-primary">{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-light text-sm text-muted-foreground">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`likes:${i.documentId}`">
-                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-base rounded-none">
+                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-sm rounded-none">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -62,11 +62,11 @@ import {
           <!-- recent -->
           <template #recent="{ items, title }">
             <SidebarGroup>
-              <SidebarGroupLabel class="font-light text-base text-primary">{{ title }}</SidebarGroupLabel>
+              <SidebarGroupLabel class="font-light text-sm text-muted-foreground">{{ title }}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`recent:${i.documentId}`">
-                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-base rounded-none">
+                    <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-sm rounded-none">
                       <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
                         {{ i.datum.job_title }}
                       </RouterLink>
@@ -88,7 +88,7 @@ import {
         >
           <LogOut/>
         </Button>
-        <div class="overflow-hidden truncate text-base font-light dark:font-light tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
+        <div class="overflow-hidden truncate text-sm font-light dark:font-light tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
         <Button
           class="cursor-pointer text-primary scale-90"
           variant="ghost"

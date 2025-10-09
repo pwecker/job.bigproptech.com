@@ -1,10 +1,20 @@
 <script lang="ts" setup>
 
 // route prop
-import { computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, type RouteLocationNormalized } from 'vue-router'
 const route = useRoute()
 const currentId = computed(() => route.params.key as string)
+
+// auth
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+const authStore = useAuthStore()
+const { preTeased, isAuthenticated } = storeToRefs(authStore)
+const forceLogin = ref(false)
+const forceLoginPrompt = computed(() => {
+  return forceLogin.value && !isAuthenticated.value
+})
 
 // single data
 import { getSingleData } from '@/composables/useDetailApi'
@@ -29,17 +39,17 @@ const { uninteractedChunk, getInteractionStatus } = useInteractedData(data, {
 })
 
 const stack = computed<string[]>(() => {
-  const id = currentId.value
-  if (!id) return []
+  const current = currentId.value
+  if (!current) return []
 
-  const status = getInteractionStatus(id).value
-  if (status?.hasInteraction) return [id]
+  const status = getInteractionStatus(current).value
+  if (status?.hasInteraction) return [current]
 
   const next = uninteractedChunk.value?.map(item => item.datum.documentId) ?? []
 
   lastUp.value = next[0] === next[1]
   const random = next[Math.floor(Math.random() * next.length)]
-  return [id, random]
+  return [current, random]
 })
 
 // interaction
@@ -48,15 +58,31 @@ const { queueInteraction } = useInteractionStore()
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const handleInteraction = (payload: { documentId: string, jobTitle: string, flavor: InteractionFlavor }): void => {
+
   const nextUp = stack.value[1]
-  if (nextUp) {
-    router.push({ path: `/${nextUp}` })
-  } else {
-    router.push({ path: '/' })
+  carouselKey.value = `next:${nextUp}`
+  if (preTeased.value && !isAuthenticated.value) {
+    forceLogin.value = true
+    const intendedRoute = {
+      ...route,
+      fullPath: `/${stack.value[1]}`,
+      path: `/${stack.value[1]}`,
+      params: { key: stack.value[1] }
+    } as RouteLocationNormalized
+    authStore.setIntendedRoute(intendedRoute)
+  }
+
+  if (!forceLoginPrompt.value) {
+    if (nextUp) {
+      router.push({ path: `/${nextUp}` })
+    } else {
+      router.push({ path: '/' })
+    }
   }
 
   const { documentId, jobTitle, flavor } = payload
   queueInteraction(documentId, jobTitle, flavor)
+  
 }
 
 // carousel
@@ -66,7 +92,12 @@ const api = ref<CarouselApi>()
 const relativeProgress = ref(0)
 const prevSnap = ref<number | null>(null)
 const locked = ref(false)
+
 const carouselKey = ref(currentId.value)
+
+watchOnce(isAuthenticated, () => {
+  carouselKey.value = 'loggedin'
+})
 
 function setApi(val?: CarouselApi) {
   if (!val) return
@@ -99,7 +130,6 @@ function setApi(val?: CarouselApi) {
         }
 
         relativeProgress.value = 0
-        carouselKey.value = `reset:${stack.value[0]}`
       }, 250)
 
       timeouts.value.push(timeoutId)
@@ -125,10 +155,24 @@ function setApi(val?: CarouselApi) {
   })
 }
 
+const carouselOpts = computed(() => {
+return {
+  align: 'start' as const,
+  loop: false,
+  startIndex: 1,
+  watchDrag: !forceLoginPrompt.value
+}})
+
 // bg click emit
 const emit = defineEmits<{
   (e: 'backgroundClick'): void
 }>()
+
+const handleBgClick = () => {
+  if (!forceLoginPrompt.value) {
+    emit('backgroundClick')
+  }
+}
 
 // unmount
 import { onUnmounted } from 'vue'
@@ -154,30 +198,35 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 import { CircleCheck, CircleX } from 'lucide-vue-next'
+import Login from '@/Login.vue'
+import { watchOnce } from '@vueuse/core'
 </script>
 <template>
 <div class="w-full h-full relative flex items-center justify-center">
   <Carousel
+    :data-xyz="carouselKey"
     v-if="!loading"
     class="absolute inset-0 z-3"
-    :opts="{ align: 'start', loop: false, startIndex: 1 }"
+    :opts="carouselOpts"
     :key="carouselKey"
- 
     @init-api="setApi"
-    @click="emit('backgroundClick')"
+    @click="handleBgClick"
   >
     <CarouselContent class="h-dvh w-full m-0">
       <CarouselItem></CarouselItem>
-      <CarouselItem class="p-0 w-full h-full flex justify-center items-center">
+      <CarouselItem
+        class="p-0 w-full h-full flex justify-center items-center"
+      >
         <div class="cardstack relative">
           <Transition appear name="card-0">
             <div
               v-if="stack[0]"
               :key="stack[0]"
-              class="h-full absolute inset-0"
-              :style="`--delay-leave: ${0}s; --delay-enter: ${0.1}s`"
+              class="h-full absolute inset-0 bg-background overflow-hidden"
+              :style="`--delay-leave: ${0}s; --delay-enter: ${0.125}s`"
             >
-              <DataDetail :documentId="stack[0]" @interaction="handleInteraction"/>
+              <Login v-if="forceLoginPrompt" />
+              <DataDetail v-else :documentId="stack[0]" @interaction="handleInteraction"/>
             </div>
           </Transition>
         </div>
@@ -191,14 +240,17 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
     <Transition appear name="card-1">
       <div
         v-if="stack[1]"
-        class="absolute w-full h-full bg-background"
+        class="absolute w-full h-full bg-background overflow-hidden"
         :class="[
           'z-2',
           'translate-x-[var(--app-sm-spacing)] -translate-y-[var(--app-sm-spacing)]'
         ]"
         :key="stack[1]"
-        :style="`--delay-leave: ${0.1}s; --delay-enter: ${0.2}s`"
-      ><DataDetail :documentId="stack[1]" @interaction="handleInteraction"/></div>
+        :style="`--delay-leave: ${0.125}s; --delay-enter: ${0.25}s`"
+      >
+        <Login v-if="(preTeased || forceLogin) && !isAuthenticated" />
+        <DataDetail v-else :documentId="stack[1]" @interaction="handleInteraction"/>
+      </div>
     </Transition>
 
     <Transition appear name="card-2">
@@ -209,9 +261,9 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
           'z-1',
           'translate-x-[calc(var(--app-sm-spacing)*2)] -translate-y-[calc(var(--app-sm-spacing)*2)]'
         ]"
-        :style="`--delay-leave: ${0.2}s; --delay-enter: ${0.3}s`"
+        :style="`--delay-leave: ${0.25}s; --delay-enter: ${0.375}s`"
         :key="`after:${stack[1]}`"
-      ><DataDetail :documentId="null" @interaction="handleInteraction"/></div>
+      ><DataDetail :documentId="null"/></div>
     </Transition>
 
   </div>
@@ -238,10 +290,10 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
 
 /* card 0 */
 .card-0-enter-active {
-  transition: transform 0.5s calc(var(--delay-enter)) ease-in-out, opacity 0.5s calc(var(--delay-enter)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-enter)) ease-in-out, opacity 0.25s calc(var(--delay-enter)) ease-in-out;
 }
 .card-0-leave-active {
-  transition: transform 0.5s calc(var(--delay-leave)) ease-in-out, opacity 0.5s calc(var(--delay-leave)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-leave)) ease-in-out, opacity 0.25s calc(var(--delay-leave)) ease-in-out;
 }
 
 .card-0-enter-from {
@@ -255,10 +307,10 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
 
 /* card 1 */
 .card-1-enter-active {
-  transition: transform 0.5s calc(var(--delay-enter)) ease-in-out, opacity 0.5s calc(var(--delay-enter)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-enter)) ease-in-out, opacity 0.25s calc(var(--delay-enter)) ease-in-out;
 }
 .card-1-leave-active {
-  transition: transform 0.5s calc(var(--delay-leave)) ease-in-out, opacity 0.5s calc(var(--delay-leave)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-leave)) ease-in-out, opacity 0.25s calc(var(--delay-leave)) ease-in-out;
 }
 
 .card-1-enter-from {
@@ -272,10 +324,10 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
 
 /* card 2 */
 .card-2-enter-active {
-  transition: transform 0.5s calc(var(--delay-enter)) ease-in-out, opacity 0.5s calc(var(--delay-enter)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-enter)) ease-in-out, opacity 0.25s calc(var(--delay-enter)) ease-in-out;
 }
 .card-2-leave-active {
-  transition: transform 0.5s calc(var(--delay-leave)) ease-in-out, opacity 0.5s calc(var(--delay-leave)) ease-in-out;
+  transition: transform 0.25s calc(var(--delay-leave)) ease-in-out, opacity 0.25s calc(var(--delay-leave)) ease-in-out;
 }
 
 .card-2-enter-from {

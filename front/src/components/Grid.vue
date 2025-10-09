@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Icon from '@/components/Icon.vue'
-import CategoryBadges from '@/components/Categories.vue'
 
 import { onMounted, onUnmounted } from 'vue'
 if (import.meta.hot) {
@@ -234,6 +233,7 @@ onUnmounted(() => {
   }
 })
 
+import Loading from '@/components/Loading.vue'
 </script>
 <template>
   <AgGridVue
@@ -256,6 +256,7 @@ onUnmounted(() => {
     :rowHeight="rowHeight"
     @grid-ready="onGridReady"
     @row-clicked="onRowClicked"
+    :loadingOverlayComponent="Loading"
   />
   <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
     {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}

@@ -7,7 +7,7 @@ const isOpen = ref(false)
 
 // badges
 import { computed } from 'vue'
-import { Categories, getTagData } from '@/composables/useTagApi'
+import { categoryColors, Categories, getTagData } from '@/composables/useTagApi'
 const { data, loading, error } = getTagData('grouped')
 const badges = computed(() =>
   Object.entries(data.value ?? {}).map(([category, values]) =>
@@ -17,7 +17,6 @@ const badges = computed(() =>
 
 // components
 import { ScrollArea } from '@/components/ui/scroll-area'
-import CategoryBadges from '@/components/Categories.vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,17 +26,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { SlidersHorizontal } from 'lucide-vue-next'
+import { Tags } from 'lucide-vue-next'
 import LoadingElement from '@/components/Loading.vue'
 </script>
 <template>
   <UseTemplate>
     <div v-if="loading"><LoadingElement /></div>
-    <div v-else class="flex flex-col gap-4">
+    <div v-else class="flex flex-col gap-4 font-light">
       <div v-for="(group, groupIndex) in badges">
         <fieldset class="border-1 rounded-md p-2 flex flex-wrap gap-1.5">
-          <legend class="text-xs">{{ group[0].category }}</legend>
-          <CategoryBadges :params="{value:group}"/>
+          <legend class="text-xs flex items-center">
+            <div class="w-1.5 h-1.5 rounded-sm mx-0.5 mr-1" :class="[categoryColors[group[0].category as Categories]]"></div>
+            {{ group[0].category }}
+          </legend>
+          <div v-html="data![group[0].category].join(' ')"></div>
         </fieldset>
       </div>
     </div>
@@ -46,7 +48,7 @@ import LoadingElement from '@/components/Loading.vue'
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
       <Button variant="ghost" class="cursor-pointer text-primary" size="icon" @click="$event.currentTarget.blur()">
-        <SlidersHorizontal class="text-primary scale-90" :size="10"/>
+        <Tags class="text-primary scale-90" :size="10"/>
       </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px] lg:max-w-[800px] h-[72vh] flex flex-col">

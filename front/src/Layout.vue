@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const authStore = useAuthStore()
-const { isTeased, isAuthenticated } = storeToRefs(authStore)
+const { fullTeased, isAuthenticated } = storeToRefs(authStore)
 
 // components
 import Login from '@/Login.vue'
@@ -44,13 +44,13 @@ import {
 
   <!-- popup login -->
   <Transition name="fade" mode="out-in">
-    <div v-if="isTeased && !isAuthenticated"
+    <div v-if="fullTeased && !isAuthenticated"
       class="absolute inset-0 z-19 bg-black/50 backdrop-blur-sm"
     ></div>
   </Transition>
   <Transition name="fade-grow" mode="out-in">
     <div
-      v-if="isTeased && !isAuthenticated"
+      v-if="fullTeased && !isAuthenticated"
       class="absolute inset-0 z-20"
     ><Login /></div>
   </Transition>

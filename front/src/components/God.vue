@@ -2,8 +2,7 @@
 
 // data
 import { type InteractionFlavor } from '@/stores/interaction'
-import { type ListData, type TagDoc } from '@/composables/useFullApi';
-import { defineProps } from 'vue'
+import { type ListData } from '@/composables/useFullApi';
 const props = defineProps<{
   params: {
     data: ListData
@@ -32,16 +31,18 @@ const interacted = computed(() => {
   return interactionStore.getFlavor(documentId)
 })
 
-// categories
+// use categories
+import { type TagDoc } from '@/composables/useFullApi'
 import { Categories, type CategorySet, categoryColors } from '@/composables/useTagApi'
 const categories = computed(() => {
+  if (props.params.data?.tags === null) return null
   const tags: TagDoc[] | undefined = props.params.data?.tags
   if (!tags) return null
 
   return tags.reduce((acc: any, current: any) => {
-    const { category, value } = current
+    const { category, value: val, quantifier } = current
     acc[category] = acc[category] || []
-    acc[category].push(value)
+    acc[category].push({val, quantifier})
     return acc
   }, {})
 });
@@ -120,8 +121,13 @@ import { Separator } from "@/components/ui/separator"
     <!-- categories -->
     <span class="gap-x-1 font-light dark:font-light flex items-center" :class="interacted === 'dislike' ? 'text-primary' : 'text-primary'" v-for="(group, name) in categories as CategorySet">
       <div class="w-1.5 h-1.5 rounded-sm mx-0.5" :class="[categoryColors[name as Categories], interacted === 'dislike' ? 'opacity-15': '']"></div>
-      <template v-for="(word, index) in group" :key="index">
-        <span class="uppercase tracking-wide whitespace-nowrap">{{ word }}<span v-if="index < (group.length ?? 0) - 1">,</span></span>
+      <template v-for="(item, index) in group" :key="index">
+        <span
+          class="uppercase tracking-wide whitespace-nowrap"
+          :class="[
+            item.quantifier === 'required' ? 'underline' : ''
+          ]"
+        >{{ item.val }}<span v-if="index < (group.length ?? 0) - 1">,</span></span>
       </template>
     </span>
 

@@ -19,7 +19,12 @@ export enum Categories {
   PerksCulture = "perks & culture",
 }
 
-export type CategorySet = Record<Categories, string[]>
+enum Quantifiers {
+  Required = 'required',
+  Preferred = 'preferred',
+  Suggested = 'suggested'
+}
+
 type CategoryColors = Record<Categories, string>
 export const categoryColors: CategoryColors = {
   [Categories.ProgrammingLanguage]: 'bg-indigo-400 dark:bg-indigo-300',
@@ -44,6 +49,13 @@ export interface CategoryBadge {
   category: Categories
   value: string
 }
+
+interface CategoryValue {
+  val: string
+  quantifier: Quantifiers | null
+}
+
+export type CategorySet = Record<Categories, CategoryValue[]>
 
 export interface TagsDataReturn {
   data: Ref<GroupedTags | null>

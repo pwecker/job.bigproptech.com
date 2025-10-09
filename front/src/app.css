@@ -17,3 +17,7 @@
 body {
   font-family: 'RobotoCondensed';
 }
+
+:root:not(.dark) .font-light {
+  font-weight: 400;
+}
