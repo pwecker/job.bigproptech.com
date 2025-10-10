@@ -64,8 +64,8 @@ const emit = defineEmits<{ (e: 'interaction', payload: { documentId: string, job
 
 // components
 import { CircleX, CircleCheck, X } from 'lucide-vue-next'
-import Loading from './Loading.vue'
-import { Button } from './ui/button'
+import Loading from '@/components/Loading.vue'
+import { Button } from '@/components/ui/button'
 </script>
 <template>
 
