@@ -17,13 +17,15 @@ export default async (policyContext: Core.PolicyContext, config, { strapi }) => 
 
     
     if (current > maxRequests) {
-      ctx.status = 429;
-      ctx.body = { error: 'Too many requests, please try again later.' };
-      return false;
+      return ctx.throw(429, 'Too many requests.');
     }
     
     return true;
   } catch (error) {
+    if (error.status === 429) {
+      throw error;
+    }
+
     console.error('Rate limit policy error:', error);
     return true;
   }
