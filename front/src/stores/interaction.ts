@@ -34,7 +34,7 @@ export interface InteractionDataReturn {
   refetch: (options?: { headers?: Record<string, string> }) => Promise<Interaction[] | null>
   getFlavor: (datumId: string) => InteractionFlavor | null
   setInteraction: (datumId: string, flavor: InteractionFlavor) => Promise<void>
-  queueInteraction: (datumId: string, jobTitle: string, flavor: InteractionFlavor) => void
+  queueInteraction: (datumId: string | null | undefined, jobTitle: string, flavor: InteractionFlavor) => void
   flushPendingInteractions: () => Promise<void>
   hydrateResource: () => void
   waitForHydration: () => Promise<void>
@@ -190,7 +190,11 @@ export function useInteractionData(): InteractionDataReturn {
     }
   }
 
-  function queueInteraction(datumId: string, jobTitle: string, flavor: InteractionFlavor) {
+  function queueInteraction(datumId: string | null | undefined, jobTitle: string | null | undefined, flavor: InteractionFlavor) {
+    if (!datumId || !jobTitle) {
+      return
+    }
+
     const existingPending = pendingInteractions.value.find(p => p.datum.documentId === datumId)
     if (existingPending) {
       existingPending.documentId = `pending:${flavor}:${datumId}`

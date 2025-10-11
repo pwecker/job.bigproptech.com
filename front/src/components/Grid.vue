@@ -79,7 +79,12 @@ const getRowId = ref<GetRowIdFunc>((params: GetRowIdParams) => {
 
 // ag grid values
 import GodCell from './God.vue'
-
+import { UseGodCol } from '@/composables/useGodCol'
+defineOptions({
+  components: {
+    GodCell,
+  },
+});
 // ag grid columns
 import { Timer, BriefcaseBusiness, Tags, MapPinned, Star, CircleCheck, CircleX } from 'lucide-vue-next'
 const defaultColDef = {
@@ -94,7 +99,20 @@ const colDefs = computed<ColDef[]>(() => [
     },
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
-    cellRenderer: GodCell,
+    cellRenderer: 'GodCell',
+    valueGetter: (params: ValueGetterParams) => {
+      const data = params.data
+      const { relativeDateLabel, parseDescription, parseTitle, parseCategories } = UseGodCol()
+      return {
+        relativeDate: relativeDateLabel(data?.job_posted_at_datetime_utc || data?.updatedAt),
+        title: parseTitle(data?.job_title),
+        description: parseDescription(data?.job_description),
+        categories: parseCategories(data?.tags),
+        employer: data?.employer_name || null,
+        location: data?.job_location || null,
+        documentId: data?.documentId || null
+      }
+    }
   }
 ])
 
@@ -105,7 +123,7 @@ const startNumber = ref(0)
 const endNumber = ref(LIST_PAGE_SIZE as number)
 const lastNumberString = ref('More')
 import { shallowRef } from 'vue'
-import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams } from 'ag-grid-community'
+import { type GridApi, type GridReadyEvent, type IDatasource, type IGetRowsParams, type ValueGetterParams } from 'ag-grid-community'
 import { LIST_PAGE_SIZE } from '@/composables/useFullApi'
 const gridApi = shallowRef<GridApi<ListData[]> | null>(null)
 const onGridReady = async (params: GridReadyEvent) => {

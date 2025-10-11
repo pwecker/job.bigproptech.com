@@ -1,16 +1,35 @@
 import { type ListData } from '@/composables/useFullApi'
+import { type CategorySet } from '@/composables/useTagApi'
+import { type InteractionFlavor, useInteractionStore } from '@/stores/interaction'
+import { type TagDoc } from '@/composables/useFullApi'
+
+export interface GodColCell {
+  relativeDate: string | null
+  title: string[] | null
+  description: string[] | null
+  categories: CategorySet | null
+  employer: string | null
+  location: string | null
+  documentId: string | null
+}
 
 interface useGodColReturn {
-  godCollVal(data: ListData): string
-  relativeDateLabel(utcString: string): string
+  relativeDateLabel(utcString: string | null): string | null
+  parseTitle(titleText: string | null | undefined): string[] | null
+  parseDescription(longtext: string | null | undefined): string[] | null
+  parseCategories(tags: TagDoc[] | null | undefined): CategorySet | null
+  getInteractionStatus(documentId: string | null | undefined): InteractionFlavor | null
+  godCollString(data: ListData): string
 }
 
 export const UseGodCol = (): useGodColReturn => {
 
-  function relativeDateLabel(utcString: string) {
+  function relativeDateLabel(utcString: string | null) {
+    if (!utcString) return null
+
     const inputDate = new Date(utcString)
     if (isNaN(inputDate.getTime())) {
-      throw new Error(`Invalid date string: ${utcString}`)
+      return null
     }
   
     const now = new Date()
@@ -46,15 +65,56 @@ export const UseGodCol = (): useGodColReturn => {
     }
   }
 
-  const godCollVal = (data: ListData) => {
+  function parseTitle(titleText: string | null | undefined) {
+    if (!titleText) return null
+    return titleText.split(' ')
+  }
+
+  function parseDescription(longtext: string | null | undefined) {
+    if (!longtext) return null
+    
+    const maxLength = 800
+    return longtext
+      .replace(/[\r\n\t]+/g, ' ')
+      .replace(/[^\w\s.,!?;:'"()-]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, maxLength)
+      .split(' ')
+  }
+
+  function parseCategories(tags: TagDoc[] | null | undefined) {
+    if (!tags || tags.length === 0) return null
+    
+    return tags.reduce((acc: any, current: any) => {
+      const { category, value: val, quantifier } = current
+      acc[category] = acc[category] || []
+      acc[category].push({val, quantifier})
+      return acc
+    }, {})
+  }
+
+  const interactionStore = useInteractionStore()
+
+  function getInteractionStatus(documentId: string | null | undefined) {
+    if (!documentId) return null
+    return interactionStore.getFlavor(documentId)
+  }
+
+  const godCollString = (data: ListData) => {
     const datetime = data.job_posted_at_datetime_utc || data.updatedAt
     return `
       ${relativeDateLabel(datetime)}
       ${data.job_title}
     `
   }
+
   return {
-    godCollVal,
-    relativeDateLabel
+    relativeDateLabel,
+    parseTitle,
+    parseDescription,
+    parseCategories,
+    getInteractionStatus,
+    godCollString
   }
 }
