@@ -2,12 +2,12 @@
 
 // user
 import { computed } from 'vue'
-import { useAuthStore } from './stores/auth'
+import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 
 // account settings
 import { Button } from '@/components/ui/button'
-import { Settings, Sun, Moon, LogOut } from 'lucide-vue-next'
+import { Sun, Moon, LogOut } from 'lucide-vue-next'
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { toggleDark } = uxStore
@@ -17,7 +17,7 @@ const logout = (() => router.push('logout'))
 
 // components
 import { BriefcaseBusiness } from 'lucide-vue-next'
-import Interactions from './components/Interactions.vue'
+import Interactions from '@/components/Interactions.vue'
 import { 
   SidebarHeader,
   SidebarInset,

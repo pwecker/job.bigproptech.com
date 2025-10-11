@@ -9,9 +9,9 @@ const authOff = import.meta.env['VITE_APP_AUTH_OFF'] === 'true'
 import { useAuthStore } from '@/stores/auth'
 
 // components
-import Layout from '@/Layout.vue'
-import Login from '@/Login.vue'
-import Auth from '@/Auth.vue'
+import Body from '@/components/Body.vue'
+import Login from '@/components/Login.vue'
+import Auth from '@/components/Auth.vue'
 
 // routes
 import { createRouter, createWebHistory } from 'vue-router'
@@ -32,7 +32,7 @@ const router = createRouter({
     },
     {
       path: '/',
-      component: Layout,
+      component: Body,
       meta: { requiresAuth: true },
       children: [
         {
@@ -44,7 +44,7 @@ const router = createRouter({
         },
         {
           path: ':key',
-          name: 'carousel',
+          name: 'stack',
           components: {
             default: () => import('@/components/Grid.vue'),
             overlay: () => import('@/components/Stack.vue')

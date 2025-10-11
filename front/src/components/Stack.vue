@@ -198,13 +198,12 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 import { CircleCheck, CircleX } from 'lucide-vue-next'
-import Login from '@/Login.vue'
+import Login from '@/components/Login.vue'
 import { watchOnce } from '@vueuse/core'
 </script>
 <template>
 <div class="w-full h-full relative flex items-center justify-center">
   <Carousel
-    :data-xyz="carouselKey"
     v-if="!loading"
     class="absolute inset-0 z-3"
     :opts="carouselOpts"

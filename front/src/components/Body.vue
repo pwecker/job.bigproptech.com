@@ -10,9 +10,9 @@ const authStore = useAuthStore()
 const { fullTeased, isAuthenticated } = storeToRefs(authStore)
 
 // components
-import Login from '@/Login.vue'
-import Sidebar from '@/Sidebar.vue'
-import Settings from '@/Settings.vue'
+import Login from '@/components/Login.vue'
+import Sidebar from '@/components/Sidebar.vue'
+import Tags from '@/components/Tags.vue'
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
@@ -22,14 +22,14 @@ import {
   <Sidebar class="">
     <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
       <SidebarTrigger variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
-      <Settings/>
+      <Tags/>
     </header>
 
     <router-view/>
 
     <!-- overlay content -->
     <Transition name="fade" mode="out-in">
-      <div v-if="route.name === 'carousel'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
+      <div v-if="route.name === 'stack'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
     </Transition>
 
     <router-view
