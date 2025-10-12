@@ -2,7 +2,7 @@ import type { Core } from '@strapi/strapi';
 
 export default async (policyContext: Core.PolicyContext, config, { strapi }) => {
   const { ctx } = policyContext.request;
-  
+
   try {
     const ip = ctx.request.ip;
     const key = `limit:${ip}`;

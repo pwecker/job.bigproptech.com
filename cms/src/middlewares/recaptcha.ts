@@ -45,7 +45,6 @@ const thresholds = {
 module.exports = (config, { strapi }) => {
   return async (ctx: any, next: any) => {
     if (isDev || !client) {
-      console.log('dev!')
       return next();
     }
 
