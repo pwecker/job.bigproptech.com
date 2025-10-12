@@ -16,6 +16,7 @@ onMounted(() => {
 // email
 import { ref, reactive } from 'vue'
 const submitting = ref(false)
+const submitted = ref(false)
 const formData = reactive({
   email: ''
 });
@@ -25,15 +26,17 @@ async function handleSubmit () {
   submitting.value = true
   try {
     const token = await execute('email_login')
-    await fetch(`${import.meta.env.VITE_API_BASE_URL}/email-login`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/email-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         recaptcha_token: token,
         recaptcha_action: 'email_login',
         to: formData.email
-      }),
+      })
     })
+
+    submitted.value = response.status === 200
   } finally {
     submitting.value = false
   }
@@ -102,7 +105,7 @@ import {
 <div class="w-full h-full flex justify-center items-center border-accent border-1">
   <div class="flex flex-col gap-6">
     <Card>
-      <CardHeader class="text-center">
+      <CardHeader v-if="!submitted" class="text-center">
         <CardTitle class="text-xl">
           Please log in
         </CardTitle>
@@ -113,7 +116,7 @@ import {
       <CardContent>
         <form @submit.prevent="handleSubmit">
           <div class="grid gap-6">
-            <div class="flex flex-col gap-4">
+            <div v-if="!submitted" class="flex flex-col gap-4">
               <Button @click="openGoogleAuth" type="button" variant="outline" class="w-full cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
@@ -124,19 +127,19 @@ import {
                 With gmail
               </Button>
             </div>
-            <div class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <div v-if="!submitted" class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span class="relative z-10 bg-background px-2 text-muted-foreground">
                 or send a login link to
               </span>
             </div>
-            <div class="grid gap-6">
-              <div class="grid gap-2">
+            <div v-if="!submitted" class="grid gap-6 transition-opacity">
+              <div class="grid gap-2 min-h-[3.6em]">
                 <Label html-for="email">Email</Label>
                 <Input
                   v-model="formData.email"
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="me@example.com"
                   :disabled="!ready"
                   required
                 />
@@ -147,6 +150,7 @@ import {
                 <span v-else>Send</span>
               </Button>
             </div>
+            <div v-if="submitted" class="min-w-[18em] text-center">Login Link Sent</div>
             <!-- <div class="text-center text-sm">
               Don't have an account?
               <a href="#" class="underline underline-offset-4">
@@ -157,7 +161,7 @@ import {
         </form>
       </CardContent>
     </Card>
-    <div class="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
+    <div v-if="!submitted" class="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
       By clicking continue, you agree to our
       
       <Popover>

@@ -41,7 +41,7 @@ export const useAuthStore = defineStore('auth', {
 	getters: {
 		isAuthenticated: (state): boolean => state.jwt !== null,
 		preTeased: (state): boolean => state.teased >= 4,
-		fullTeased: (state): boolean => state.teased >= 8
+		fullTeased: (state): boolean => state.teased >= 3
 	},
 
 	actions: {

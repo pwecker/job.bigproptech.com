@@ -88,7 +88,7 @@ import {
         >
           <LogOut/>
         </Button>
-        <div class="overflow-hidden truncate text-sm font-light dark:font-light tracking-wider">{{ authStore.user?.username || 'Guest' }}</div>
+        <div class="overflow-hidden truncate text-sm font-light dark:font-light tracking-wider">{{ authStore.user?.username || authStore.user?.email || 'Guest' }}</div>
         <Button
           class="cursor-pointer text-primary scale-90"
           variant="ghost"

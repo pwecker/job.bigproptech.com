@@ -14,8 +14,9 @@
   font-display: swap;
 }
 
-body {
+html, body {
   font-family: 'RobotoCondensed';
+  overscroll-behavior-y: none;
 }
 
 :root:not(.dark) .font-light {
