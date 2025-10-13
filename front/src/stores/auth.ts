@@ -72,6 +72,7 @@ export const useAuthStore = defineStore('auth', {
 		logout() {
 			this.authenticated = false
 			this.intendedRoute = null
+			this.teased = 0
 			this.user = null
 			this.jwt = null
 			localStorage.removeItem('jwt')

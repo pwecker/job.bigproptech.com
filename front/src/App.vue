@@ -15,7 +15,10 @@ onMounted(() => {
 
 <template>
   <!-- font guard -->
-  <div v-if="!ux.fontsReady" class="invisible absolute -z-1 font-robotoCondensed">.</div>
+  <div v-if="!ux.fontsReady" class="invisible absolute -z-1">
+    <span class="font-robotoCondensed">.</span>
+    <span class="font-[instrumentSerif]">.</span>
+  </div>
   <!-- app -->
   <RouterView v-if="ux.fontsReady" />
 </template>

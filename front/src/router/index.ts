@@ -60,7 +60,7 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const authStore = useAuthStore()
         authStore.logout()
-        next('/login')
+        next('/')
       }
     }
   ]

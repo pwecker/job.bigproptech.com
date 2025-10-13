@@ -6,6 +6,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         robotoCondensed: ['RobotoCondensed', 'sans-serif'],
+        instrumentSerif: ['InstrumentSerif', 'serif'],
       },
     },
   },

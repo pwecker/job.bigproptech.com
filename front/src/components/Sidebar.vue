@@ -35,7 +35,7 @@ import {
 </script>
 <template>
   <SidebarProvider class="h-full w-full select-none">
-    <Sidebar class="border-r-1 border-r-border">
+    <Sidebar class="border-r-1 border-r-border relative">
       <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
         <BriefcaseBusiness class="scale-65 text-primary"/>
       </SidebarHeader>
@@ -105,3 +105,18 @@ import {
     </SidebarInset>
   </SidebarProvider>
 </template>
+<style>
+/* override shadcn's internal fixed layout */
+/* [data-slot="sidebar-wrapper"] [data-slot="sidebar"] {
+  position:relative
+}
+:deep(.sidebar) {
+  opacity: 0.4;
+  position: relative !important;
+  height: auto !important;
+  top: auto !important;
+}
+:deep(.sidebar-provider) {
+  position: relative !important;
+} */
+</style>
