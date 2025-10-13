@@ -38,6 +38,7 @@ export interface InteractionDataReturn {
   flushPendingInteractions: () => Promise<void>
   hydrateResource: () => void
   waitForHydration: () => Promise<void>
+  reset: () => void
 }
 
 const INTERACTIONS_KEY = '/interactions'
@@ -205,6 +206,8 @@ export function useInteractionData(): InteractionDataReturn {
   
     if (authStore.jwt) {
       void setInteraction(datumId, flavor)
+    } else {
+      authStore.tease()
     }
   }
 
@@ -213,6 +216,12 @@ export function useInteractionData(): InteractionDataReturn {
     const toFlush = [...pendingInteractions.value]
     await Promise.all(toFlush.map(p => setInteraction(p.datum.documentId, p.flavor)))
     pendingInteractions.value = []
+  }
+
+  function reset() {
+    data.value = null
+    loading.value = false
+    error.value = null
   }
 
   interactionSingleton = {
@@ -227,7 +236,8 @@ export function useInteractionData(): InteractionDataReturn {
     queueInteraction,
     flushPendingInteractions,
     hydrateResource,
-    waitForHydration
+    waitForHydration,
+    reset
   }
 
   return interactionSingleton
@@ -261,6 +271,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     getFlavor: interactionData.getFlavor,
     setInteraction: interactionData.setInteraction,
     queueInteraction: interactionData.queueInteraction,
-    flushPendingInteractions: interactionData.flushPendingInteractions
+    flushPendingInteractions: interactionData.flushPendingInteractions,
+    reset: interactionData.reset
   }
 })

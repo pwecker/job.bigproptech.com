@@ -22,13 +22,19 @@ interface AuthUser {
 
 interface AuthState {
 	authenticated: boolean
-	teased: number
 	jwt: string | null
 	user: AuthUser | null
+	teased: number
 	intendedRoute?: RouteLocationNormalized | null
 }
 
 import { defineStore } from 'pinia'
+
+// other stores
+import { useInteractionStore } from '@/stores/interaction'
+import { useUXStore } from '@/stores/ux'
+
+// todo: this is really User
 export const useAuthStore = defineStore('auth', {
 	state: (): AuthState => ({
 		authenticated: false,
@@ -41,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
 	getters: {
 		isAuthenticated: (state): boolean => state.jwt !== null,
 		preTeased: (state): boolean => state.teased >= 4,
-		fullTeased: (state): boolean => state.teased >= 3
+		fullTeased: (state): boolean => state.teased >= 3,
 	},
 
 	actions: {
@@ -77,6 +83,12 @@ export const useAuthStore = defineStore('auth', {
 			this.jwt = null
 			localStorage.removeItem('jwt')
 			localStorage.removeItem('user')
+
+			const interactionStore = useInteractionStore()
+			interactionStore.reset()
+
+			const uXStore = useUXStore()
+			uXStore.bottomed = false
 		},
 
 		setIntendedRoute(route: RouteLocationNormalized) {

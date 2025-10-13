@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
 // user
-import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
 
 // account settings
 import { Button } from '@/components/ui/button'
@@ -34,8 +35,8 @@ import {
 } from '@/components/ui/sidebar'
 </script>
 <template>
-  <SidebarProvider class="h-full w-full select-none">
-    <Sidebar class="border-r-1 border-r-border relative">
+  <SidebarProvider :key="isAuthenticated + ''" :defaultOpen="isAuthenticated" class="h-full w-full select-none">
+    <Sidebar class="border-r-1 border-r-border">
       <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
         <BriefcaseBusiness class="scale-65 text-primary"/>
       </SidebarHeader>

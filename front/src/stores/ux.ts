@@ -11,6 +11,9 @@ export type UXStore = {
   waitForFonts: (timeoutMs?: number) => Promise<void>
   fontsReady: Ref<boolean>
 
+  // site flow
+  bottomed: Ref<boolean>
+
   // preferences
   categories: Ref<Record<string, Record<string, boolean>>>
   toggleCategory: (badge: CategoryBadge) => void
@@ -23,6 +26,9 @@ import { defineStore } from 'pinia'
 import { useDark, useToggle } from '@vueuse/core'
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
+
+// site
+const bottomed = ref<boolean>(false)
 
 // preferences
 const categories = ref<Record<string, Record<string, boolean>>>({})
@@ -85,5 +91,5 @@ export const useUXStore = defineStore('ux', (): UXStore => {
     return activeBadges.value.has(`${badge.category}:${badge.value}`)
   }
 
-  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory }
+  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory, bottomed }
 })

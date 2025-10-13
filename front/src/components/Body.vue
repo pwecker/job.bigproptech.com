@@ -2,30 +2,37 @@
 
 // route guard
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { storeToRefs } from 'pinia'
 
 import { computed } from 'vue'
 const route = useRoute()
+
+// scroll
+import { ref } from 'vue'
+import { ScrollArea } from '@/components/ui/scroll-area'
+const offset = ref<number>(0)
+const handleScrollCapture = (event: UIEvent) => {
+  const target = event.target as HTMLElement
+  if(target.getAttribute('data-slot') === 'scroll-area-viewport') {
+    offset.value = target.scrollTop
+    const maxScroll = target.scrollHeight - target.clientHeight
+    bottomed.value = target.scrollTop >= maxScroll - 1
+  }
+}
+
+// site flow
+import { useUXStore } from '@/stores/ux'
+const uxStore = useUXStore()
+const { bottomed } = storeToRefs(uxStore)
+
+// user flow
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 const authStore = useAuthStore()
 const { fullTeased, isAuthenticated } = storeToRefs(authStore)
 const forceLogin = computed(() => {
   return fullTeased.value && !isAuthenticated.value
 })
 
-// scroll
-import { ref } from 'vue'
-const offset = ref<number>(0)
-const bottomed = ref<boolean>(false)
-
-// todo: untangle from nested api - transfer at bottom
-const handleScrollCapture = (event: UIEvent) => {
-  const target = event.target as HTMLElement
-  offset.value = target.scrollTop
-
-  const maxScroll = target.scrollHeight - target.clientHeight
-  if (!bottomed.value) bottomed.value = target.scrollTop >= maxScroll - 1
-}
 
 // components
 import Hero from '@/components/Hero.vue'
@@ -35,7 +42,7 @@ import Tags from '@/components/Tags.vue'
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { ScrollArea } from '@/components/ui/scroll-area'
+
 </script>
 <template>
 <ScrollArea
@@ -54,7 +61,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
   <div class="relative flex-1 z-0 bg-background">
     <Sidebar>
       <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
-        <SidebarTrigger variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
+        <SidebarTrigger :class="{ 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
         <Tags/>
       </header>
 

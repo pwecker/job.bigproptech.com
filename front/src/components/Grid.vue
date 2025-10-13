@@ -1,6 +1,19 @@
 <script setup lang="ts">
-import Icon from '@/components/Icon.vue'
 
+// user flow
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
+// site flow
+import { useUXStore } from '@/stores/ux'
+const uxStore = useUXStore()
+const { bottomed } = storeToRefs(uxStore)
+const gridUnlocked = computed(() => {
+  return isAuthenticated.value || bottomed.value
+})
+
+import Icon from '@/components/Icon.vue'
 import { onMounted, onUnmounted } from 'vue'
 if (import.meta.hot) {
   if (!import.meta.hot.data.gridState) {
@@ -251,10 +264,12 @@ onUnmounted(() => {
   }
 })
 
+
 import Loading from '@/components/Loading.vue'
 </script>
 <template>
   <AgGridVue
+    :class="{'pointer-events-none': !gridUnlocked }"
     class="ag-theme-container h-full"
     :theme="currentTheme"
     :columnDefs="colDefs"
