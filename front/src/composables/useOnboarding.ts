@@ -40,11 +40,8 @@ export function createOnboarding(steps: OnboardingStep[]): OnboardingReturn {
     currentStepIndex: 0,
     isActive: false,
     completed: (route?.name !== 'grid' || !route?.meta.showHero),
-    // completed: false,
     reseted: false
   })
-
-  console.log(route?.name !== 'grid' || !route?.meta.showHero)
 
   const currentStep = computed(() => 
     state.value.steps[state.value.currentStepIndex]

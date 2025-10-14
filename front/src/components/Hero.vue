@@ -12,7 +12,7 @@ const ux = useUXStore()
       :style="{top:`calc(${(offset / 1.5) * 0.69}px`}"
     ></div>
 
-    <div v-if="ux.isDark" class="dark-shape-two w-[calc(100vw*1)] h-full bg-indigo-950/50 top-0 left-[50%] -translate-x-[50%] absolute z-1 mix-blend-multiply"
+    <div v-if="ux.isDark" class="dark-shape-two w-[calc(100vw*1)] h-full bg-indigo-950/50 grayscale-70 top-0 left-[50%] -translate-x-[50%] absolute z-1 mix-blend-multiply"
       :style="{top:`calc(${(offset / 1.5) * 0.75}px`}"
     ></div>
 
