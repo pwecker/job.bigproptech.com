@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// todo: close when sidebar link clicked mobile
 
 // user
 import { useAuthStore } from '@/stores/auth'
