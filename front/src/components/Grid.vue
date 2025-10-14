@@ -9,8 +9,12 @@ const { isAuthenticated } = storeToRefs(authStore)
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { bottomed } = storeToRefs(uxStore)
+
+// todo: grid locked on log out
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const gridUnlocked = computed(() => {
-  return isAuthenticated.value || (bottomed.value && !onboardingState.value.isActive)
+  return isAuthenticated.value || !route.meta.showHero || (bottomed.value && !onboardingState.value.isActive)
 })
 
 import Icon from '@/components/Icon.vue'
@@ -212,11 +216,11 @@ const rowClassRules: RowClassRules = {
     return interaction.value.hasInteraction
   },
   'row-onboarding': (params) => {
-    if (!bottomed.value) return true
+    if (onboardingState.value.completed) return false
+    if (!bottomed.value || !route.meta.showHero) return true
 
     const isGridTooltip = onboardingState.value.isActive && onboardingState.value.steps[onboardingState.value.currentStepIndex]?.id === 'grid'
     if (isGridTooltip && !onboardingState.value.completed) {
-      console.log('!')
       return params.rowIndex !== onboardingTargetRowIndex.value
     }
 
