@@ -34,7 +34,6 @@ const OnboardingKey: InjectionKey<ReturnType<typeof createOnboarding>> = Symbol(
 export function createOnboarding(steps: OnboardingStep[]): OnboardingReturn {
   const route = useRoute()
 
-  // todo: needs to complete when hero not loaded
   const state = ref<OnboardingState>({
     steps,
     currentStepIndex: 0,

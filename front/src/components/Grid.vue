@@ -10,7 +10,6 @@ import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { bottomed } = storeToRefs(uxStore)
 const gridUnlocked = computed(() => {
-  console.log([isAuthenticated.value, bottomed.value, !onboardingState.value.isActive])
   return isAuthenticated.value || (bottomed.value && !onboardingState.value.isActive)
 })
 
@@ -213,15 +212,17 @@ const rowClassRules: RowClassRules = {
     return interaction.value.hasInteraction
   },
   'row-onboarding': (params) => {
-    // console.log([onboardingState.value.completed, onboardingState.value.isActive])
     if (!bottomed.value) return true
 
-    // todo: get from in view
-    // if (onboardingState.value.isActive && params.rowIndex === 2 && onboardingState.value.currentStepIndex === 1) return false
+    const isGridTooltip = onboardingState.value.isActive && onboardingState.value.steps[onboardingState.value.currentStepIndex]?.id === 'grid'
+    if (isGridTooltip && !onboardingState.value.completed) {
+      console.log('!')
+      return params.rowIndex !== onboardingTargetRowIndex.value
+    }
+
     if (!onboardingState.value.completed || onboardingState.value.isActive) return true
     return false
   }
-
 }
 
 function refreshRowById(documentId: string) {
@@ -279,33 +280,47 @@ onUnmounted(() => {
 // onboarding
 import OnboardingTooltip from './OnboardingTooltip.vue'
 import { useOnboarding } from '@/composables/useOnboarding'
+const onboardingTargetRowIndex = ref<number | null>(null)
 const { state: onboardingState } = useOnboarding()
 watch(gridUnlocked, (newValue) => {
 
-  // todo: row flash on: onboard, detail, refresh, close, bottomed
   if (!gridApi.value) return
   if (!onboardingState.value.isActive || onboardingState.value.completed || onboardingState.value.reseted) {
     gridApi.value.redrawRows()
   }
 })
-watch (() => onboardingState.value.currentStepIndex, (newValue) => {
+import { nextTick } from 'vue'
+watch (() => [onboardingState.value.currentStepIndex, onboardingState.value.isActive], ([newStepIndex, oldStepIndex],[newOnboardingActive, oldOnboardingActive]) => {
 
-  // todo: always get one from in view
-  // if (gridApi.value) {
-  //   console.log(gridApi.value.getRenderedNodes())
-  // }
-  if (onboardingState.value.isActive && gridApi.value) {
-    const rowNode = gridApi.value.getDisplayedRowAtIndex(2)
-    if (rowNode) {
-      gridApi.value.redrawRows({ rowNodes: [rowNode] })
+  const newIndex = newStepIndex as number
+  const isGridTooltip = onboardingState.value.steps[newIndex].id === 'grid'
+
+  if (!onboardingState.value.completed) {
+    if (isGridTooltip) {
+      nextTick(() => {
+        if (!gridApi.value) return 
+        const gridDiv = document.querySelector('.ag-body-viewport')
+        if (gridDiv) {
+          const scrolledRows = Math.floor(gridDiv.scrollTop / rowHeight.value)
+          onboardingTargetRowIndex.value = scrolledRows + 2
+          
+          const rowNode = gridApi.value.getDisplayedRowAtIndex(onboardingTargetRowIndex.value)
+          if (rowNode) {
+            gridApi.value.redrawRows({ rowNodes: [rowNode] })
+          }
+        }
+      })
+    } else {
+      if (gridApi.value) {
+        gridApi.value.redrawRows()
+      }
     }
-  } else if (!onboardingState.value.isActive) {}
+  }
 })
 
 import Loading from '@/components/Loading.vue'
 </script>
 <template>
-  <!-- todo: top rows flash -->
   <OnboardingTooltip step-id="grid"><div :style="{'top':3.6*rowHeight + 'px'}" class="fixed top-[calc] left-[50%] -translate-x-[-50%]"></div></OnboardingTooltip>
   <AgGridVue
     :class="{'pointer-events-none': !gridUnlocked}"
