@@ -115,6 +115,7 @@ import { Button } from '@/components/ui/button'
         <div class="portrait:row-start-3 portrait:col-start-1 portrait:row-span-1 portrait:col-span-5 row-start-1 col-start-5 row-span-3">
 
           <!-- apply options -->
+          <!-- todo: place at least employer link -->
           <div class="pt-[var(--app-xs-spacing)] portrait:p-0 flex portrait:flex-row overflow-x-auto flex-col leading-[1.125em]">
             <div v-for="option in data?.apply_options" class="font-light">
               <a @click.stop="" class="w-full lg:text-sm text-xs whitespace-nowrap hover:underline" :href="option.apply_link" >[ {{ option.publisher }} ]</a>

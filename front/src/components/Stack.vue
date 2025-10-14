@@ -42,6 +42,8 @@ const stack = computed<string[]>(() => {
   const current = currentId.value
   if (!current) return []
 
+  // todo: authing on an interacted document tricks the stack
+
   const status = getInteractionStatus(current).value
   if (status?.hasInteraction) return [current]
 

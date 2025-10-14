@@ -102,6 +102,7 @@ import {
 } from "@/components/ui/popover"
 </script>
 <template>
+<!-- todo: change state when auth/google pops up -->
 <div class="w-full h-full flex justify-center items-center border-accent border-1">
   <div class="flex flex-col gap-6">
     <Card>

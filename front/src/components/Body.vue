@@ -71,6 +71,7 @@ import {
 } from '@/components/ui/sidebar'
 </script>
 <template>
+<!-- todo: add authed transition -->
 <ScrollArea
   ref="scrollAreaRef"
   :class="[
@@ -116,6 +117,7 @@ import {
 
   <!-- popup login -->
   <Transition name="fade" mode="out-in">
+    <!-- todo: background edge shows while growing -->
     <div v-if="forceLogin"
       class="fixed inset-0 z-19 bg-black/50 backdrop-blur-sm"
     ></div>
