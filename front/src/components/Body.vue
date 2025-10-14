@@ -131,13 +131,13 @@ import {
   <!-- popup login -->
   <Transition name="fade" mode="out-in">
     <!-- todo: background edge shows while growing -->
-    <div v-if="forceLogin"
+    <div v-if="forceLogin && !isAuthenticated"
       class="fixed inset-0 z-19 bg-black/50 backdrop-blur-sm"
     ></div>
   </Transition>
   <Transition name="fade-grow" mode="out-in">
     <div
-      v-if="forceLogin"
+      v-if="forceLogin && !isAuthenticated"
       class="fixed inset-0 z-20"
     ><Login /></div>
   </Transition>
