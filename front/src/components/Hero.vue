@@ -3,6 +3,33 @@ defineProps<{ offset: number }>()
 
 import { useUXStore } from '@/stores/ux'
 const ux = useUXStore()
+
+import { ref, onMounted, onUnmounted } from 'vue'
+const textGroups = [
+  {
+    title: 'Swipe Through Data',
+    subtitle: 'Sort thousands of items in minutes, not hours'
+  },
+  {
+    title: 'Any Source, One View',
+    subtitle: 'Connects disparate data into a unified workspace'
+  },
+  {
+    title: 'Real-Time Updates',
+    subtitle: 'Massively parallel collection at scale'
+  },
+]
+
+const currentIndex = ref(0)
+let intervalId: NodeJS.Timeout | null = null
+onMounted(() => {
+  intervalId = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % textGroups.length
+  }, 3500)
+})
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
+})
 </script>
 <template>
 
@@ -42,21 +69,17 @@ const ux = useUXStore()
 
     <div class="absolute inset-0 flex flex-col items-center justify-center z-3 gap-3">
 
-      <!-- todo: tailwind child iterations -->
-      <section class="text-center">
-        <p class="lg:text-7xl text-5xl tracking-[0.015em] font-[instrumentSerif]">Tinder UI/UX</p>
-        <p class="lg:text-xl text-lg font-thin tracking-wide">Novel Data Strolling</p>
-      </section>
+       <Transition name="fade" mode="out-in">
+        <section :key="currentIndex" class="flex flex-col text-center gap-[var(--app-xs-spacing)]">
+          <p class="lg:text-7xl text-5xl tracking-[0.015em] font-[instrumentSerif]">
+            {{ textGroups[currentIndex].title }}
+          </p>
+          <p class="lg:text-xl text-lg font-thin tracking-wide">
+            {{ textGroups[currentIndex].subtitle }}
+          </p>
+        </section>
 
-      <section class="text-center">
-        <p class="lg:text-7xl text-5xl tracking-[0.015em] font-[instrumentSerif]">Multiple Data Source</p>
-        <p class="lg:text-xl text-lg font-thin tracking-wide">Inferential Normalization</p>
-      </section>
-
-      <section class="text-center">
-        <p class="lg:text-7xl text-5xl tracking-[0.015em] font-[instrumentSerif]">Fast Data Sync</p>
-        <p class="lg:text-xl text-lg font-thin tracking-wide">Highly Concurrent Context Cycling</p>
-      </section>
+       </Transition>
 
     </div>
 
@@ -94,5 +117,15 @@ const ux = useUXStore()
     var(--color-middle) 50%,
     var(--color-end) 100%
   );
+}
+
+/* just fade */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
