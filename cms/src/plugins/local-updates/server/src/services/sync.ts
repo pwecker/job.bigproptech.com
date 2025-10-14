@@ -75,7 +75,9 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     const mappedData: Record<string, any> = {};
 
     for (const [strapiField, mapping] of Object.entries(fields)) {
-      mappedData[strapiField] = resolveMapping(mapping, mongoDoc);
+      const syncData = resolveMapping(mapping, mongoDoc);
+      if (syncData) mappedData[strapiField] = syncData;
+      else delete mappedData[strapiField];
     }
 
     mappedData.segments = { connect: documentId };
@@ -108,7 +110,7 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
       }
     } catch (error) {
       if (error.name === 'ValidationError') {
-        console.warn(`Validation failed for document, skipping: ${error.message}`);
+        console.warn(`Validation failed: ${JSON.stringify(error.details.errors)}`);
         return null; // Return null to indicate this document was skipped
       }
       throw error; // Re-throw other errors
