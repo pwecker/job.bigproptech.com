@@ -105,6 +105,11 @@ export function useInteractionData(): InteractionDataReturn {
 
   function waitForHydration(): Promise<void> {
     return new Promise((resolve) => {
+      if (data.value !== null && loading.value === false) {
+        resolve()
+        return
+      }
+
       const stop = watch(
         [data, loading],
         ([d, l]) => {
@@ -112,8 +117,7 @@ export function useInteractionData(): InteractionDataReturn {
             stop()
             resolve()
           }
-        },
-        { immediate: true }
+        }
       )
     })
   }
