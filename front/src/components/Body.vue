@@ -61,8 +61,22 @@ const onboardingSteps: OnboardingStep[] = [
   }
 ]
 
+// force reflow for ios safari etc.
+import { watch } from 'vue'
+watch(bottomed, (newVal) => {
+  if (!newVal) return
+
+  requestAnimationFrame(() => {
+    const viewport = document.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement | null
+    if (!viewport) return
+
+    viewport.style.overflowY = 'hidden'
+    void viewport.offsetHeight
+    viewport.style.overflowY = 'auto'
+  })
+})
+
 // components
-import Hero from '@/components/Hero.vue'
 import Login from '@/components/Login.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import Tags from '@/components/Tags.vue'
@@ -73,7 +87,6 @@ import {
 <template>
 <!-- todo: add authed transition -->
 <ScrollArea
-  ref="scrollAreaRef"
   :class="[
     'h-dvh',
     { 'hide-thumb': bottomed },
