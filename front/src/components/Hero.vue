@@ -5,8 +5,9 @@ import { useUXStore } from '@/stores/ux'
 const ux = useUXStore()
 </script>
 <template>
-  <div class="w-full h-[calc(1*100vh)] relative pointer-events-none dark:overflow-hidden text-primary">
 
+  <!-- dark mode -->
+  <div class="w-full h-[calc(1*100vh)] relative pointer-events-none dark:overflow-hidden text-primary">
     <div v-if="ux.isDark" class="dark-shape-one w-[calc(100vw*1)] h-full bg-ring/5 top-0 left-[50%] -translate-x-[50%] absolute z-2"
       :style="{top:`calc(${(offset / 1.5) * 0.69}px`}"
     ></div>
@@ -18,10 +19,11 @@ const ux = useUXStore()
     <div v-if="ux.isDark" class="radial-gradient absolute -right-[200px] w-200 h-322 rounded-full opacity-10"
       style="--gradient-x: 50%; --gradient-y: 50%; --color-start: oklch(44.6% 0.043 257.281/10); --color-middle: oklch(27.7% 0.046 192.524/0); --color-end: transparent;"
       :style="{top:`calc(${(offset / 1.5) * 0.75}px`}"
-      
     >
     </div>
 
+    <!-- light mode -->
+    <div v-if="!ux.isDark" class="linear-grid absolute inset-0 z-1 opacity-60 mix-blend-overlay"></div>
     <div v-if="!ux.isDark" class="radial-gradient absolute -top-[600px] -right-[200px] w-200 h-322 rounded-full opacity-20"
       style="--gradient-x: 50%; --gradient-y: 50%; --color-start: oklch(85.5% 0.138 181.071); --color-middle: oklch(27.7% 0.046 192.524/0); --color-end: transparent;">
     </div>
@@ -61,6 +63,13 @@ const ux = useUXStore()
   </div>
 </template>
 <style scoped>
+.linear-grid {
+  background-size: var(--app-md-spacing) var(--app-md-spacing);
+  background-image:
+  linear-gradient(to right, var(--muted) 1px, transparent 1px),
+  linear-gradient(to bottom, var(--muted) 1px, transparent 1px);
+}
+
 .dark-shape-one { clip-path: path('M239.018 -1C-43.6588 66.6334 -141.61 365.38 1728 1019.3V1117H0V-1H239.018Z');}
 .dark-shape-two { clip-path: path('M1728 1117V579.696C1103.2 541.71 312.46 421.689 3.32779 157.973V1117H1728Z'); }
 

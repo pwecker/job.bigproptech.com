@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tags } from 'lucide-vue-next'
 import LoadingElement from '@/components/Loading.vue'
+import OnboardingTooltip from './OnboardingTooltip.vue'
 </script>
 <template>
   <UseTemplate>
@@ -47,9 +48,14 @@ import LoadingElement from '@/components/Loading.vue'
 
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="ghost" class="cursor-pointer text-primary" size="icon" @click="$event.currentTarget.blur()">
-        <Tags class="text-primary scale-90" :size="10"/>
-      </Button>
+      <OnboardingTooltip step-id="tags">
+        <Button variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary" @click="$event.currentTarget.blur()">
+          
+            <Tags class="text-primary scale-90" :size="10"/>
+          
+        </Button>
+      </OnboardingTooltip>
+
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px] lg:max-w-[800px] h-[72vh] flex flex-col">
       <DialogHeader class="flex-shrink-0">

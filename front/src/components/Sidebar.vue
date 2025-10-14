@@ -16,6 +16,10 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const logout = (() => router.push('logout'))
 
+// onboarding
+import { useOnboarding } from '@/composables/useOnboarding'
+const onboarding = useOnboarding()
+
 // components
 import { BriefcaseBusiness } from 'lucide-vue-next'
 import Interactions from '@/components/Interactions.vue'
@@ -33,6 +37,8 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar'
+import { Info } from 'lucide-vue-next'
+
 </script>
 <template>
   <SidebarProvider :key="isAuthenticated + ''" :defaultOpen="isAuthenticated" class="h-full w-full select-none">
@@ -87,9 +93,18 @@ import {
           @click="logout()"
           size="icon"
         >
-          <LogOut/>
+          <LogOut v-if="isAuthenticated"/>
         </Button>
-        <div class="overflow-hidden truncate text-sm font-light dark:font-light tracking-wider">{{ authStore.user?.username || authStore.user?.email || 'Guest' }}</div>
+        <div class="overflow-hidden flex items-center truncate text-sm font-light dark:font-light tracking-wider">
+          <Button
+            v-if="!isAuthenticated"
+            class="cursor-pointer text-primary scale-90 mr-[var(--app-xs-spacing)]"
+            variant="ghost"
+            @click="onboarding.reset();onboarding.start()"
+            size="icon"
+          ><Info/></Button>
+          {{ authStore.user?.username || authStore.user?.email || 'Guest' }}
+        </div>
         <Button
           class="cursor-pointer text-primary scale-90"
           variant="ghost"

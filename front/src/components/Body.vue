@@ -23,6 +23,12 @@ const handleScrollCapture = (event: UIEvent) => {
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { bottomed } = storeToRefs(uxStore)
+import { onMounted } from 'vue'
+onMounted(() => {
+  if (route.name === 'grid' && isAuthenticated.value) {
+    bottomed.value = true
+  }
+})
 
 // user flow
 import { useAuthStore } from '@/stores/auth'
@@ -33,6 +39,27 @@ const forceLogin = computed(() => {
   return fullTeased.value && !isAuthenticated.value
 })
 
+// onboarding
+import OnboardingTooltip from '@/components/OnboardingTooltip.vue'
+import OnboardingProvider from '@/components/OnboardingProvider.vue'
+import type { OnboardingStep } from '@/composables/useOnboarding'
+const onboardingSteps: OnboardingStep[] = [
+  {
+    id: 'grid',
+    title: 'Yes/No UI',
+    content: 'Click them to swipe through'
+  },
+  {
+    id: 'sidebar',
+    title: 'Liked items',
+    content: 'They save to the sidebar'
+  },
+  {
+    id: 'tags',
+    title: 'Tags',
+    content: 'View all tags'
+  }
+]
 
 // components
 import Hero from '@/components/Hero.vue'
@@ -42,10 +69,10 @@ import Tags from '@/components/Tags.vue'
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-
 </script>
 <template>
 <ScrollArea
+  ref="scrollAreaRef"
   :class="[
     'h-dvh',
     { 'hide-thumb': bottomed },
@@ -55,32 +82,37 @@ import {
 >
 
   <!-- hero -->
-  <Hero :offset="offset" v-if="!isAuthenticated" class="shrink-0 z-0"/>
+  <!-- todo: dont load on internal routes -->
+  <Hero :offset="offset" v-if="route.name === 'grid' && !isAuthenticated && !bottomed" class="shrink-0 z-0"/>
 
   <!-- body -->
   <div class="relative flex-1 z-0 bg-background">
-    <Sidebar>
-      <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
-        <SidebarTrigger :class="{ 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
-        <Tags/>
-      </header>
+    <OnboardingProvider :steps="onboardingSteps" :auto-start="false">
+      <Sidebar>
+        <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
+          <OnboardingTooltip step-id="sidebar">
+            <SidebarTrigger :class="{ 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
+          </OnboardingTooltip>
+          <Tags/>
+        </header>
 
-      <router-view/>
+        <router-view/>
 
-      <!-- overlay content -->
-      <Transition name="fade" mode="out-in">
-        <div v-if="route.name === 'stack'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
-      </Transition>
+        <!-- overlay content -->
+        <Transition name="fade" mode="out-in">
+          <div v-if="route.name === 'stack'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
+        </Transition>
 
-      <router-view
-        v-slot="{ Component }"
-        name="overlay"
-      >
-        <div v-if="Component" class="absolute inset-0 z-10">
-          <component  :is="Component" @backgroundClick="$router.push('/')" />
-        </div>
-      </router-view>
-    </Sidebar>
+        <router-view
+          v-slot="{ Component }"
+          name="overlay"
+        >
+          <div v-if="Component" class="absolute inset-0 z-10">
+            <component  :is="Component" @backgroundClick="$router.push('/')" />
+          </div>
+        </router-view>
+      </Sidebar>
+    </OnboardingProvider>
   </div>
 
   <!-- popup login -->
