@@ -25,7 +25,7 @@ const uxStore = useUXStore()
 const { bottomed } = storeToRefs(uxStore)
 import { onMounted } from 'vue'
 onMounted(() => {
-  if (route.name === 'grid' && isAuthenticated.value) {
+  if ((route.name === 'grid' && isAuthenticated.value) || !route.meta.showHero) {
     bottomed.value = true
   }
 })
@@ -82,8 +82,7 @@ import {
 >
 
   <!-- hero -->
-  <!-- todo: dont load on internal routes -->
-  <Hero :offset="offset" v-if="route.name === 'grid' && !isAuthenticated && !bottomed" class="shrink-0 z-0"/>
+  <router-view v-if="route.meta.showHero && !bottomed" name="hero" :offset="offset" class="shrink-0 z-0"/>
 
   <!-- body -->
   <div class="relative flex-1 z-0 bg-background">

@@ -1,6 +1,7 @@
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
+    showHero?: boolean
   }
 }
 
@@ -12,6 +13,7 @@ import { useAuthStore } from '@/stores/auth'
 import Body from '@/components/Body.vue'
 import Login from '@/components/Login.vue'
 import Auth from '@/components/Auth.vue'
+import Hero from '@/components/Hero.vue'
 
 // routes
 import { createRouter, createWebHistory } from 'vue-router'
@@ -40,8 +42,10 @@ const router = createRouter({
           path: '',
           name: 'grid',
           components: {
-            default: () => import('@/components/Grid.vue')
-          }
+            default: () => import('@/components/Grid.vue'),
+            hero: Hero
+          },
+          meta: { showHero: true }
         },
         {
           path: ':key',
@@ -66,16 +70,24 @@ const router = createRouter({
   ]
 })
 
-// auth guard
+// guard
 router.beforeEach((to, from, next) => {
+
+  // auth
   const authStore = useAuthStore()
   if (authOff) {
     next()
     return
   }
 
-  if (to.meta.requiresAuth && !authStore.authenticated) {
+  // hero
+  if (to.name === 'grid' && !authStore.isAuthenticated && !from.name) {
+    to.meta.showHero = true
+  } else {
+    to.meta.showHero = false
+  }
 
+  if (to.meta.requiresAuth && !authStore.authenticated) {
     authStore.setIntendedRoute(to)
 
     // tease

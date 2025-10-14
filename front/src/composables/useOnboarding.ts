@@ -31,19 +31,20 @@ interface OnboardingReturn {
 
 const OnboardingKey: InjectionKey<ReturnType<typeof createOnboarding>> = Symbol('onboarding')
 
-
-
 export function createOnboarding(steps: OnboardingStep[]): OnboardingReturn {
   const route = useRoute()
 
+  // todo: needs to complete when hero not loaded
   const state = ref<OnboardingState>({
     steps,
     currentStepIndex: 0,
     isActive: false,
-    completed: route?.name !== 'grid',
+    completed: (route?.name !== 'grid' || !route?.meta.showHero),
     // completed: false,
     reseted: false
   })
+
+  console.log(route?.name !== 'grid' || !route?.meta.showHero)
 
   const currentStep = computed(() => 
     state.value.steps[state.value.currentStepIndex]

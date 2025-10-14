@@ -10,6 +10,7 @@ import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { bottomed } = storeToRefs(uxStore)
 const gridUnlocked = computed(() => {
+  console.log([isAuthenticated.value, bottomed.value, !onboardingState.value.isActive])
   return isAuthenticated.value || (bottomed.value && !onboardingState.value.isActive)
 })
 
