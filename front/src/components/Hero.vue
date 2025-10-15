@@ -33,6 +33,8 @@ onUnmounted(() => {
 </script>
 <template>
 
+  <!-- todo size iterations clip paths, lean into thick border on dark -->
+
   <!-- dark mode -->
   <div class="w-full h-[calc(1*100vh)] relative pointer-events-none dark:overflow-hidden text-primary">
     <div v-if="ux.isDark" class="dark-shape-one w-[calc(100vw*1)] h-full bg-ring/5 top-0 left-[50%] -translate-x-[50%] absolute z-2"
