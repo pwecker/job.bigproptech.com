@@ -70,6 +70,8 @@ const controller: Core.Controller = {
     try {
       if (!TAGS_ON) throw new Error('tags off');
       const tagService = strapi.plugin('local-updates').service('tag') as TagServiceReturn;
+
+      // todo: tag from own segment
       const result = await tagService.processBatch(TAGS_CAP);
 
       ctx.body = result;
