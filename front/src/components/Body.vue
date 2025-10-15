@@ -104,6 +104,7 @@ import {
       <Sidebar>
         <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
           <OnboardingTooltip step-id="sidebar">
+            <!-- todo: posb race condition in :class -->
             <SidebarTrigger :class="{ 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
           </OnboardingTooltip>
           <Tags/>

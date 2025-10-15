@@ -210,6 +210,7 @@ const { getInteractionStatus } = useInteractedData<ListData>(data, { getDataId: 
 import type { RowClassRules } from 'ag-grid-community'
 const rowClassRules: RowClassRules = {
 
+  // todo: not greyed out before bottomed
   'row-interacted': (params) => {
     if (!params.data) return false
     const interaction = getInteractionStatus(params.data.documentId)
