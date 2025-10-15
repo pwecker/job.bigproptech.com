@@ -50,7 +50,7 @@ import OnboardingTooltip from './OnboardingTooltip.vue'
   <Dialog v-model:open="isOpen">
     <OnboardingTooltip step-id="tags">
       <DialogTrigger as-child>
-        <Button variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary" @click="console.log('!');$event.currentTarget.blur()">
+        <Button variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary" @click="$event.currentTarget.blur()">
           <Tags class="text-primary scale-90" :size="10"/>
         </Button>
       </DialogTrigger>

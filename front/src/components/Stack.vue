@@ -225,6 +225,7 @@ import { watchOnce } from '@vueuse/core'
               :key="stack[0]"
               class="h-full absolute inset-0 bg-background overflow-hidden"
               :style="`--delay-leave: ${0}s; --delay-enter: ${0.125}s`"
+              :class="[forceLoginPrompt ? 'border-1 border-accent' : '']"
             >
               <Login v-if="forceLoginPrompt" />
               <DataDetail v-else :documentId="stack[0]" @interaction="handleInteraction"/>
@@ -244,7 +245,8 @@ import { watchOnce } from '@vueuse/core'
         class="absolute w-full h-full bg-background overflow-hidden"
         :class="[
           'z-2',
-          'translate-x-[var(--app-sm-spacing)] -translate-y-[var(--app-sm-spacing)]'
+          'translate-x-[var(--app-sm-spacing)] -translate-y-[var(--app-sm-spacing)]',
+          ((preTeased || forceLogin) && !isAuthenticated) ? 'border-1 border-accent' : ''
         ]"
         :key="stack[1]"
         :style="`--delay-leave: ${0.125}s; --delay-enter: ${0.25}s`"

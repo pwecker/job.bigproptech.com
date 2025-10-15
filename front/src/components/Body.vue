@@ -131,7 +131,6 @@ import {
 
   <!-- popup login -->
   <Transition name="fade" mode="out-in">
-    <!-- todo: background edge shows while growing -->
     <div v-if="forceLogin && !isAuthenticated"
       class="fixed inset-0 z-19 bg-black/50 backdrop-blur-sm"
     ></div>
@@ -149,7 +148,7 @@ import {
 /* just fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease 0s;
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -159,7 +158,7 @@ import {
 /* fade + grow */
 .fade-grow-enter-active,
 .fade-grow-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.1s ease 0.2s, transform 0.1s ease 0.2s;
 }
 .fade-grow-enter-from,
 .fade-grow-leave-to {
