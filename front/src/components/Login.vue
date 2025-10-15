@@ -103,6 +103,7 @@ import {
 </script>
 <template>
 <!-- todo: change state when auth/google pops up -->
+<!-- todo: bring down e.g. button colors, bring up subtext -->
 <div class="w-full h-full flex justify-center items-center border-accent border-1">
   <div class="flex flex-col gap-6">
     <Card>
