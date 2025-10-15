@@ -60,6 +60,8 @@ const bootstrap = (app: any) => {
         payload: {},
       });
 
+      // todo: add delete segment function
+
       return (
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
           <div style={{ width: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '1rem', alignItems: 'center' }}>
