@@ -136,7 +136,7 @@ function setApi(val?: CarouselApi) {
 
       timeouts.value.push(timeoutId)
       return
-    } else if (uninteractedChunk.value === null) {
+    } else if (uninteractedChunk.value === null && selected !== prevSnap.value) {
       const timeoutId = setTimeout(() => {
         locked.value = false
         relativeProgress.value = 0
