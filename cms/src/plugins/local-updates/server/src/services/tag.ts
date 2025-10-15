@@ -80,19 +80,15 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
   }
 
   async function getUntaggedItem() {
-    const fiveDaysAgo = new Date();
-    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
 
     try {
       const untaggedData = await strapi.documents('api::data.data').findFirst({
         filters: {
           tags: {
             $null: true
-          },
-          job_posted_at_datetime_utc: {
-            $gte: fiveDaysAgo.toISOString(),
           }
         },
+        sort: { job_posted_at_datetime_utc: 'desc' },
         fields: ['id', 'documentId', 'job_employment_type', 'job_description', 'job_is_remote', 'job_highlights'],
       })
 
@@ -213,6 +209,7 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
   }
 
   async function createTagDoc(newDoc: NewTagDoc) {
+    
     try {
       const newTagDoc = await strapi
         .documents('api::tag.tag')
