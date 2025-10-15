@@ -19,7 +19,7 @@ export enum Categories {
   PerksCulture = "perks & culture",
 }
 
-enum Quantifiers {
+export enum Quantifiers {
   Required = 'required',
   Preferred = 'preferred',
   Suggested = 'suggested'
@@ -50,7 +50,7 @@ export interface CategoryBadge {
   value: string
 }
 
-interface CategoryValue {
+export interface CategoryValue {
   val: string
   quantifier: Quantifiers | null
 }

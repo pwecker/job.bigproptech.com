@@ -1,7 +1,7 @@
 import { type Ref } from 'vue'
 import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
-import type { TagDoc } from './useFullApi'
+import type { Tag, Segment } from './useFullApi'
 
 interface SingleData {
   documentId: string
@@ -30,7 +30,8 @@ interface SingleData {
   job_max_salary: number
   job_salary_period: string
   job_highlights: { [key: string]: string[] },
-  tags?: TagDoc[]
+  tags?: Tag[],
+  segments: Segment[]
 }
 
 export interface SingleDataReturn {
@@ -41,7 +42,16 @@ export interface SingleDataReturn {
 }
 
 export const DATA_FULL_KEY = '/datas'
-const DATA_FULL_QUERY: StrapiQueryOptions = { populate: ['tags'] }
+const DATA_FULL_QUERY: StrapiQueryOptions = {
+  populate: {
+    tags: {
+      fields: ['category', 'value', 'quantifier']
+    },
+    segments: {
+      fields: ['name']
+    }
+  }
+}
 
 
 export function getSingleData(documentId: string, authHeaders?: () => Record<string, string>): SingleDataReturn {

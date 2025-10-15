@@ -5,17 +5,14 @@ import type { StrapiMeta } from './useApi/requests'
 import { watchOnce } from "@vueuse/core"
 import { Categories } from '@/composables/useTagApi'
 
-interface Tag {
+export interface Tag {
   category: Categories
   value: string
   quantifier?: string
 }
 
-export interface TagDoc extends Tag {
-  id: number
-  documentId: string
-  createdAt: string
-  publishedAt: string
+export interface Segment {
+  name: string
 }
 
 export interface ListData {
@@ -29,7 +26,8 @@ export interface ListData {
   job_posted_at_datetime_utc: string | null
   job_is_remote: boolean
   job_description: string
-  tags?: TagDoc[]
+  tags?: Tag[],
+  segments?: Segment
 }
 
 export interface ListDataReturn {
@@ -60,9 +58,16 @@ const LIST_DATA_OPTIONS: StrapiQueryOptions = {
     'job_description'
   ],
   pagination: { page: 1, pageSize: LIST_PAGE_SIZE },
-  filters: { tags: { $notNull: true }, job_posted_at_datetime_utc: { $notNull: true }},
+  filters: {
+    tags: { $notNull: true },
+    job_posted_at_datetime_utc: { $notNull: true }
+  },
   sort: ['job_posted_at_datetime_utc:desc'],
-  populate: ['tags']
+  populate: {
+    tags: {
+      fields: ['category', 'value', 'quantifier']
+    }
+  }
 }
 
 let singleton: ListDataReturn | null = import.meta.hot ? (import.meta.hot.data.listDataSingleton ?? null) : null
