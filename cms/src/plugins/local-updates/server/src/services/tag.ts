@@ -86,6 +86,9 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
         filters: {
           tags: {
             $null: true
+          },
+          job_posted_at_datetime_utc: {
+            $notNull: true
           }
         },
         sort: { job_posted_at_datetime_utc: 'desc' },
