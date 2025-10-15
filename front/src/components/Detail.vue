@@ -68,6 +68,8 @@ import Loading from '@/components/Loading.vue'
 import { Button } from '@/components/ui/button'
 </script>
 <template>
+    <!-- todo: add data source -->
+    <!-- todo: block up quanitifiers -->
 
     <div @click.stop="" class="p-[var(--app-md-spacing)] pb-0 relative w-full h-full border-accent border-1 transition-[width] flex flex-col justify-between bg-popover shadow-lg">
       
@@ -115,7 +117,7 @@ import { Button } from '@/components/ui/button'
         <div class="portrait:row-start-3 portrait:col-start-1 portrait:row-span-1 portrait:col-span-5 row-start-1 col-start-5 row-span-3">
 
           <!-- apply options -->
-          <!-- todo: place at least employer link -->
+          <!-- todo: place at least employer link, and open in new tab -->
           <div class="pt-[var(--app-xs-spacing)] portrait:p-0 flex portrait:flex-row overflow-x-auto flex-col leading-[1.125em]">
             <div v-for="option in data?.apply_options" class="font-light">
               <a @click.stop="" class="w-full lg:text-sm text-xs whitespace-nowrap hover:underline" :href="option.apply_link" >[ {{ option.publisher }} ]</a>

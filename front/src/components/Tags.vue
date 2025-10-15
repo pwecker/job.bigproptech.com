@@ -31,6 +31,7 @@ import LoadingElement from '@/components/Loading.vue'
 import OnboardingTooltip from './OnboardingTooltip.vue'
 </script>
 <template>
+  <!-- todo: change to "right" controls -->
   <UseTemplate>
     <div v-if="loading"><LoadingElement /></div>
     <div v-else class="flex flex-col gap-4 font-light">

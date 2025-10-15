@@ -352,6 +352,7 @@ import Loading from '@/components/Loading.vue'
   />
   
   <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
+    <!-- todo: acts up in safari -->
     {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}
   </div>
 </template>

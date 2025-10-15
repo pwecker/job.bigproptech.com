@@ -33,6 +33,8 @@ import { Button } from './ui/button'
 import { CircleCheck, CircleX } from 'lucide-vue-next'
 </script>
 <template>
+  <!-- todo: datetime, location, one more padding top -->
+  <!-- todo: shadcn skeleton -->
   <div :data-interaction="interacted" class="god-cell leading-[var(--app-md-spacing)] gap-x-1 pt-1 text-base w-full flex flex-wrap items-center justify-start">
     <!-- distance -->
     <span class="font-light mr-1">[{{ params.value.relativeDate }}]</span>

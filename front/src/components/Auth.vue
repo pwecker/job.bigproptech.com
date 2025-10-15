@@ -61,7 +61,6 @@ const handleGoogleCallback = async () => {
 }
 
 const handleEmailCallback = async () => {
-  // todo: move to pop up post message
   const { token } = route.query
   if (!token) throw new Error('Missing email token')
 
