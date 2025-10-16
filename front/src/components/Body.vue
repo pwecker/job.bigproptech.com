@@ -36,6 +36,7 @@ import { storeToRefs } from 'pinia'
 const authStore = useAuthStore()
 const { fullTeased, isAuthenticated } = storeToRefs(authStore)
 const forceLogin = computed(() => {
+  // todo: && !forceLoginPrompt
   return fullTeased.value && !isAuthenticated.value
 })
 
