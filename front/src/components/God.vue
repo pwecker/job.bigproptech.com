@@ -31,13 +31,21 @@ function handleInteraction(flavor: InteractionFlavor) {
 // components / static
 import { Button } from './ui/button'
 import { CircleCheck, CircleX } from 'lucide-vue-next'
+import Skeleton from './ui/skeleton/Skeleton.vue';
 </script>
 <template>
-  <!-- todo: datetime, location, one more padding top -->
-  <!-- todo: shadcn skeleton -->
-  <div :data-interaction="interacted" class="god-cell leading-[var(--app-md-spacing)] gap-x-1 pt-1 text-base w-full flex flex-wrap items-center justify-start">
-    <!-- distance -->
+
+  <!-- skeleton -->
+  <div v-if="!params.value.title" class="pt-1 gap-x-1 text-base w-full h-full overflow-hidden">
+    <Skeleton class="h-[0.9rem] w-[90%]" />
+    <Skeleton class="h-[0.9rem] w-[75%] mt-[0.7rem]" />
+    <Skeleton class="h-[0.9rem] w-[97%] mt-[0.7rem]" />
+    <Skeleton class="h-[0.9rem] w-[65%] mt-[0.7rem]" />
+  </div>
+  <div :data-interaction="interacted" v-if="params.value.title" class="god-cell leading-[var(--app-md-spacing)] gap-x-1 text-base w-full flex flex-wrap items-center justify-start">
+    <!-- age -->
     <span class="font-light mr-1">[{{ params.value.relativeDate }}]</span>
+    <div class="font-light text-muted-foreground truncate max-w-[9em]">{{ params.value.datetime }}</div>
 
     <!-- title -->
     <template v-for="(word, index) in params.value.title" :key="index">
@@ -46,13 +54,13 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
 
     <!-- interaction -->
     <Button
-      class="interaction-button--like text-secondary ml-1 cursor-pointer h-full w-auto shrink-0"
+      class="interaction-button--like text-muted-foreground ml-1 cursor-pointer h-full w-auto shrink-0"
       variant="ghost"
       size="icon"
       @click.stop="handleInteraction('like')"
     ><CircleCheck /></Button>
     <Button
-      class="interaction-button--dislike text-secondary mr-0.5 cursor-pointer h-full w-auto shrink-0.5"
+      class="interaction-button--dislike text-muted-foreground mr-0.5 cursor-pointer h-full w-auto shrink-0.5"
       variant="ghost"
       size="icon"
       @click.stop="handleInteraction('dislike')"
@@ -96,9 +104,11 @@ import { CircleCheck, CircleX } from 'lucide-vue-next'
       <span class="font-light dark:font-light whitespace-nowrap">{{ word }}</span>
     </template><span class="font-light dark:font-light whitespace-nowrap">...</span>
 
+
   </div>
 </template>
 <style scoped>
+
 .god-cell[data-interaction='dislike'] .interaction-button--dislike {
   color: var(--primary);
 }

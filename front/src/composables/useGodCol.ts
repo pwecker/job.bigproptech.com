@@ -1,9 +1,10 @@
 import { type ListData } from '@/composables/useFullApi'
 import { type CategorySet } from '@/composables/useTagApi'
 import { type InteractionFlavor, useInteractionStore } from '@/stores/interaction'
-import { type TagDoc } from '@/composables/useFullApi'
+import { type Tag } from '@/composables/useFullApi'
 
 export interface GodColCell {
+  datetime: string | null
   relativeDate: string | null
   title: string[] | null
   description: string[] | null
@@ -17,7 +18,7 @@ interface useGodColReturn {
   relativeDateLabel(utcString: string | null): string | null
   parseTitle(titleText: string | null | undefined): string[] | null
   parseDescription(longtext: string | null | undefined): string[] | null
-  parseCategories(tags: TagDoc[] | null | undefined): CategorySet | null
+  parseCategories(tags: Tag[] | null | undefined): CategorySet | null
   getInteractionStatus(documentId: string | null | undefined): InteractionFlavor | null
   godCollString(data: ListData): string
 }
@@ -83,7 +84,7 @@ export const UseGodCol = (): useGodColReturn => {
       .split(' ')
   }
 
-  function parseCategories(tags: TagDoc[] | null | undefined) {
+  function parseCategories(tags: Tag[] | null | undefined) {
     if (!tags || tags.length === 0) return null
     
     return tags.reduce((acc: any, current: any) => {
@@ -102,9 +103,9 @@ export const UseGodCol = (): useGodColReturn => {
   }
 
   const godCollString = (data: ListData) => {
-    const datetime = data.job_posted_at_datetime_utc || data.updatedAt
+    const datetimeutc = data.job_posted_at_datetime_utc || data.updatedAt
     return `
-      ${relativeDateLabel(datetime)}
+      ${relativeDateLabel(datetimeutc)}
       ${data.job_title}
     `
   }

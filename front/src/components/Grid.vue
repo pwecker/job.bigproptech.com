@@ -28,7 +28,7 @@ const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: n
 const watchers = ref<(() => void)[]>([])
 
 // rows' lines
-const rowHeight = ref(window.innerWidth < 769 ? 119 : 95);
+const rowHeight = ref(window.innerWidth < 769 ? 119 : 96);
 // const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
 
 let resizeTimeout: NodeJS.Timeout;
@@ -112,7 +112,8 @@ const colDefs = computed<ColDef[]>(() => [
     wrapText: true,
     cellStyle: { 
       'clip-path': `inset(var(--app-xs-spacing) 0px var(--app-sm-spacing))`,
-      'padding-top': 'var(--app-xs-spacing)'
+      'padding-top': '0.6rem',
+      'padding-bottom': '0.5rem'
     },
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
@@ -121,6 +122,7 @@ const colDefs = computed<ColDef[]>(() => [
       const data = params.data
       const { relativeDateLabel, parseDescription, parseTitle, parseCategories } = UseGodCol()
       return {
+        datetime: data?.job_posted_at_datetime_utc || data?.updatedAt,
         relativeDate: relativeDateLabel(data?.job_posted_at_datetime_utc || data?.updatedAt),
         title: parseTitle(data?.job_title),
         description: parseDescription(data?.job_description),
