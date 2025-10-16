@@ -27,7 +27,7 @@ export interface ListData {
   job_is_remote: boolean
   job_description: string
   tags?: Tag[],
-  segments?: Segment
+  segments?: Segment[]
 }
 
 export interface ListDataReturn {
@@ -66,6 +66,9 @@ const LIST_DATA_OPTIONS: StrapiQueryOptions = {
   populate: {
     tags: {
       fields: ['category', 'value', 'quantifier']
+    },
+    segments: {
+      fields: ['name']
     }
   }
 }

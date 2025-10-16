@@ -3,17 +3,6 @@ import { type CategorySet } from '@/composables/useTagApi'
 import { type InteractionFlavor, useInteractionStore } from '@/stores/interaction'
 import { type Tag } from '@/composables/useFullApi'
 
-export interface GodColCell {
-  datetime: string | null
-  relativeDate: string | null
-  title: string[] | null
-  description: string[] | null
-  categories: CategorySet | null
-  employer: string | null
-  location: string | null
-  documentId: string | null
-}
-
 interface useGodColReturn {
   relativeDateLabel(utcString: string | null): string | null
   parseTitle(titleText: string | null | undefined): string[] | null

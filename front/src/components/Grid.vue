@@ -51,7 +51,7 @@ onMounted(() => {
 
 // data
 import { ref } from 'vue'
-import { type ListData, listData } from '@/composables/useFullApi'
+import { type ListData, type Segment, listData } from '@/composables/useFullApi'
 const { data, meta, loading, error, nextPage, fetchPage } = listData()
 
 // filtered data
@@ -119,9 +119,13 @@ const colDefs = computed<ColDef[]>(() => [
     headerComponentParams: { icon: BriefcaseBusiness },
     cellRenderer: 'GodCell',
     valueGetter: (params: ValueGetterParams) => {
-      const data = params.data
+      const data = params.data as ListData
+      const segments = data?.segments
+      let segment: Segment | null = null
+      if (segments) segment = segments[0]
       const { relativeDateLabel, parseDescription, parseTitle, parseCategories } = UseGodCol()
       return {
+        segment,
         datetime: data?.job_posted_at_datetime_utc || data?.updatedAt,
         relativeDate: relativeDateLabel(data?.job_posted_at_datetime_utc || data?.updatedAt),
         title: parseTitle(data?.job_title),

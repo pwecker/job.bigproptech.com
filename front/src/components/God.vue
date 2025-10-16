@@ -2,7 +2,20 @@
 // data
 import { categoryColors, Categories, type CategorySet } from '@/composables/useTagApi'
 import { type InteractionFlavor } from '@/stores/interaction'
-import { type GodColCell } from '@/composables/useGodCol'
+
+import { type Segment } from '@/composables/useFullApi'
+interface GodColCell {
+  datetime: string | null
+  segment: Segment | null
+  relativeDate: string | null
+  title: string[] | null
+  description: string[] | null
+  categories: CategorySet | null
+  employer: string | null
+  location: string | null
+  documentId: string | null
+}
+
 const props = defineProps<{
   params: {
     value: GodColCell
@@ -29,9 +42,10 @@ function handleInteraction(flavor: InteractionFlavor) {
 }
 
 // components / static
-import { Button } from './ui/button'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button'
 import { CircleCheck, CircleX } from 'lucide-vue-next'
-import Skeleton from './ui/skeleton/Skeleton.vue';
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 </script>
 <template>
 
@@ -70,10 +84,12 @@ import Skeleton from './ui/skeleton/Skeleton.vue';
     <span class="font-light dark:font-light">{{ params.value.employer }}</span>
 
     <!-- dot -->
-    <div class="w-[3px] h-[3px] rounded-sm mx-0.5"></div>
+    <div class="w-[3px] h-[3px] mx-1 bg-muted-foreground rounded-sm"></div>
 
     <!-- location -->
-    <span class="font-light dark:font-light">{{ params.value.location }}</span>
+    <span class="font-light dark:font-light text-muted-foreground">{{ params.value.location }}</span>
+
+    <Badge variant="secondary">{{ params.value?.segment?.name }}</Badge>
 
     <!-- distance -->
     <!--
@@ -101,7 +117,7 @@ import Skeleton from './ui/skeleton/Skeleton.vue';
 
     <!-- description -->
     <template v-for="(word, index) in params.value.description" :key="index">
-      <span class="font-light dark:font-light whitespace-nowrap">{{ word }}</span>
+      <span class="font-light dark:font-light whitespace-nowrap text-muted-foreground">{{ word }}</span>
     </template><span class="font-light dark:font-light whitespace-nowrap">...</span>
 
 
