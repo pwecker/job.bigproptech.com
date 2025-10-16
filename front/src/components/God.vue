@@ -73,7 +73,7 @@ import Skeleton from './ui/skeleton/Skeleton.vue';
     <div class="w-[3px] h-[3px] rounded-sm mx-0.5"></div>
 
     <!-- location -->
-    <span class="font-light dark:font-light">{{ params.value.employer }}</span>
+    <span class="font-light dark:font-light">{{ params.value.location }}</span>
 
     <!-- distance -->
     <!--
