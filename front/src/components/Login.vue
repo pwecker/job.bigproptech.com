@@ -111,7 +111,7 @@ import { Spinner } from './ui/spinner'
 <template>
 <div class="w-full h-full flex justify-center items-center">
   <div class="flex flex-col gap-6">
-    <Card>
+    <Card class="border-border">
       <CardHeader class="text-center">
         <CardTitle class="text-xl tracking-[-0.0125rem] text-muted-foreground">
           Please log in
