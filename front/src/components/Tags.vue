@@ -25,7 +25,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
     </ScrollArea>
   </div>
   <Transition name="fade" mode="out-in">
-    <div v-if="drawerOpen" class="visible md:invisible absolute inset-0 z-0 bg-black/80"></div>
+    <div v-if="drawerOpen" @click="uxStore.toggleDrawer()" class="visible md:invisible absolute inset-0 z-0 bg-black/80"></div>
   </Transition>
 
 </template>
