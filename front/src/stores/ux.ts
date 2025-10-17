@@ -18,6 +18,12 @@ export type UXStore = {
   categories: Ref<Record<string, Record<string, boolean>>>
   toggleCategory: (badge: CategoryBadge) => void
   isActiveCategory: (badge: CategoryBadge) => boolean
+
+  // tags
+  toggleDrawer: () => void
+  drawerOpen: Ref<boolean>
+
+  sidebarOpen: Ref<boolean>
 }
 
 import { defineStore } from 'pinia'
@@ -66,6 +72,10 @@ async function waitForFonts(timeoutMs = 690) {
   }
 }
 
+// sidebar, drawer
+const drawerOpen: Ref<boolean> = ref(true)
+const sidebarOpen: Ref<boolean> = ref(true)
+
 export const useUXStore = defineStore('ux', (): UXStore => {
   function setDark(value: boolean) {
     isDark.value = value
@@ -91,5 +101,9 @@ export const useUXStore = defineStore('ux', (): UXStore => {
     return activeBadges.value.has(`${badge.category}:${badge.value}`)
   }
 
-  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory, bottomed }
+  function toggleDrawer() {
+    drawerOpen.value = !drawerOpen.value
+  }
+
+  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory, bottomed, toggleDrawer, drawerOpen, sidebarOpen }
 })

@@ -22,7 +22,7 @@ const handleScrollCapture = (event: UIEvent) => {
 // site flow
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
-const { bottomed } = storeToRefs(uxStore)
+const { bottomed, drawerOpen, sidebarOpen } = storeToRefs(uxStore)
 import { onMounted } from 'vue'
 onMounted(() => {
   if ((route.name === 'grid' && isAuthenticated.value) || !route.meta.showHero) {
@@ -78,9 +78,11 @@ watch(bottomed, (newVal) => {
 })
 
 // components
+import { Button } from '@/components/ui/button'
+import { Tags } from 'lucide-vue-next'
 import Login from '@/components/Login.vue'
 import Sidebar from '@/components/Sidebar.vue'
-import Tags from '@/components/Tags.vue'
+
 import { 
   SidebarTrigger,
 } from '@/components/ui/sidebar'
@@ -106,9 +108,17 @@ import {
         <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
           <OnboardingTooltip step-id="sidebar">
             <!-- todo: posb race condition in :class -->
-            <SidebarTrigger :class="{ 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
+            <SidebarTrigger :class="{ 'bg-secondary': sidebarOpen, 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
           </OnboardingTooltip>
-          <Tags/>
+          <Button
+            class="cursor-pointer text-primary scale-90"
+            :class="[drawerOpen ? 'bg-secondary' : 'bg-background']"
+            variant="ghost"
+            size="icon"
+            @click="uxStore.toggleDrawer()"
+          >
+            <Tags />
+          </Button>
         </header>
 
         <router-view/>

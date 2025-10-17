@@ -329,37 +329,42 @@ watch (() => [onboardingState.value.currentStepIndex, onboardingState.value.isAc
   }
 })
 
+import TagsSidebar from '@/components/_Tags.vue'
 import Loading from '@/components/Loading.vue'
 </script>
 <template>
   <OnboardingTooltip step-id="grid"><div :style="{'top':3.6*rowHeight + 'px'}" class="fixed top-[calc] left-[50%] -translate-x-[-50%]"></div></OnboardingTooltip>
-  <AgGridVue
-    :class="{'pointer-events-none': !gridUnlocked}"
-    class="ag-theme-container h-full"
-    :theme="currentTheme"
-    :columnDefs="colDefs"
-    :defaultColDef="defaultColDef"
-    :rowModelType="rowModelType"
-    :cacheBlockSize="cacheBlockSize"
-    :cacheOverflowSize="cacheOverflowSize"
-    :maxConcurrentDatasourceRequests="maxConcurrentDatasourceRequests"
-    :infiniteInitialRowCount="infiniteInitialRowCount"
-    :maxBlocksInCache="maxBlocksInCache"
-    :pagination="pagination"
-    :paginationPageSize="LIST_PAGE_SIZE"
-    :getRowId="getRowId"
-    :rowData="rowData"
-    :rowClassRules="rowClassRules"
-    :suppressCellFocus="true"
-    :rowHeight="rowHeight"
-    @grid-ready="onGridReady"
-    @row-clicked="onRowClicked"
-    :loadingOverlayComponent="Loading"
-  />
-  
-  <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
-    <!-- todo: acts up in safari -->
-    {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}
+
+  <div class="flex w-full h-full">
+    <div class="flex-1 h-full flex flex-col transition-all duration-500 ease-in-out">
+      <AgGridVue
+        :class="{'pointer-events-none': !gridUnlocked}"
+        class="ag-theme-container h-full grow-1"
+        :theme="currentTheme"
+        :columnDefs="colDefs"
+        :defaultColDef="defaultColDef"
+        :rowModelType="rowModelType"
+        :cacheBlockSize="cacheBlockSize"
+        :cacheOverflowSize="cacheOverflowSize"
+        :maxConcurrentDatasourceRequests="maxConcurrentDatasourceRequests"
+        :infiniteInitialRowCount="infiniteInitialRowCount"
+        :maxBlocksInCache="maxBlocksInCache"
+        :pagination="pagination"
+        :paginationPageSize="LIST_PAGE_SIZE"
+        :getRowId="getRowId"
+        :rowData="rowData"
+        :rowClassRules="rowClassRules"
+        :suppressCellFocus="true"
+        :rowHeight="rowHeight"
+        @grid-ready="onGridReady"
+        @row-clicked="onRowClicked"
+        :loadingOverlayComponent="Loading"
+      />
+      <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
+        <!-- todo: acts up in safari -->
+        {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}
+      </div>
+    </div>
   </div>
 </template>
 <style scoped>

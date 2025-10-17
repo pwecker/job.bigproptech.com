@@ -13,6 +13,7 @@ import { Sun, Moon, LogOut } from 'lucide-vue-next'
 import { useUXStore } from '@/stores/ux'
 const uxStore = useUXStore()
 const { toggleDark } = uxStore
+const { sidebarOpen } = storeToRefs(uxStore)
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const logout = (() => router.push('logout'))
@@ -42,7 +43,7 @@ import { Info } from 'lucide-vue-next'
 
 </script>
 <template>
-  <SidebarProvider :key="isAuthenticated + ''" :defaultOpen="isAuthenticated" class="h-full w-full select-none">
+  <SidebarProvider v-model:open="sidebarOpen" :key="isAuthenticated + ''" :defaultOpen="isAuthenticated" class="h-full w-full select-none">
     <Sidebar class="border-r-1 border-r-border">
       <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
         <BriefcaseBusiness class="scale-65 text-primary"/>
