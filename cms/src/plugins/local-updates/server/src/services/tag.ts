@@ -117,7 +117,8 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
     Description: ${data.job_description}
     Highlights: ${JSON.stringify(data.job_highlights)}
       `.trim();
-  
+
+    // todo: reign this in
     return `TASK: Extract requirements from the job listing.  
     CATEGORIES: ${categories.join(', ')}  
     QUANTIFIERS: ${quantifiers.join(', ')}  
@@ -256,6 +257,8 @@ const tagService = ({ strapi }: { strapi: Core.Strapi }): TagServiceReturn => {
 
     for (const tag of tags) {
       try {
+
+        // todo: dedupe tags
         if (isValidTag(tag, categories, quantifiers)) {
           await createTagDoc({
             ...tag,
