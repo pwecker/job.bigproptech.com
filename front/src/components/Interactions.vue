@@ -19,6 +19,7 @@ const likes = computed(() =>
     :title="'Liked'"
   />
 
+  <!-- todo: order by recency -->
   <!-- all -->
   <slot
     v-if="all.length > 0"
