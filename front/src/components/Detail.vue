@@ -69,10 +69,15 @@ const categories = computed(() => {
     const qKey = (quantifier ?? 'null') as QuantifierKey
     if (!acc[qKey]) acc[qKey] = {}
     if (!acc[qKey][category]) acc[qKey][category] = []
-    acc[qKey][category].push({
-      val,
-      quantifier: (quantifier as Quantifiers) ?? null
-    })
+
+    const exists = acc[qKey][category].some((item: any) => item.val === val)
+    if (!exists) {
+      acc[qKey][category].push({
+        val,
+        quantifier: (quantifier as Quantifiers) ?? null
+      })
+    }
+
     return acc
   }, {} as GroupedByQuantifier)
 })

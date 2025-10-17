@@ -79,7 +79,12 @@ export const UseGodCol = (): useGodColReturn => {
     return tags.reduce((acc: any, current: any) => {
       const { category, value: val, quantifier } = current
       acc[category] = acc[category] || []
-      acc[category].push({val, quantifier})
+
+      const exists = acc[category].some((item: any) => item.val === val)
+      if (!exists) {
+        acc[category].push({ val, quantifier })
+      }
+      
       return acc
     }, {})
   }
