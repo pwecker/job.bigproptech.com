@@ -134,6 +134,7 @@ import ScrollArea from './ui/scroll-area/ScrollArea.vue';
             <div v-for="option in data?.apply_options" class="font-light">
               <a @click.stop="" class="w-full lg:text-sm text-xs whitespace-nowrap hover:underline" :href="option.apply_link" target="_blank">[ {{ option.publisher }} ]</a>
             </div>
+            <!-- todo: skip if apply_options -->
             <div v-if="data?.job_apply_link">
               <a @click.stop="" class="w-full lg:text-sm text-xs whitespace-nowrap hover:underline" :href="data?.job_apply_link" target="_blank">[ {{ data?.job_publisher || data?.employer_name || 'Direct Link' }} ]</a>
             </div>
