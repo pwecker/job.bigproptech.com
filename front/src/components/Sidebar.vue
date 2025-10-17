@@ -43,8 +43,8 @@ import { Info } from 'lucide-vue-next'
 
 </script>
 <template>
-  <SidebarProvider v-model:open="sidebarOpen" :key="isAuthenticated + ''" :defaultOpen="isAuthenticated" class="h-full w-full select-none">
-    <Sidebar class="border-r-1 border-r-border">
+  <SidebarProvider v-model:open="sidebarOpen" :key="isAuthenticated + ''" class="h-full w-full select-none">
+    <Sidebar class="border-r-border">
       <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
         <BriefcaseBusiness class="scale-65 text-primary"/>
       </SidebarHeader>
@@ -88,7 +88,7 @@ import { Info } from 'lucide-vue-next'
         </Interactions>
 
       </SidebarContent>
-      <SidebarFooter class="border-t-1 border-t-border w-full h-[var(--app-footer-height)] flex flex-row justify-between items-center px-1">
+      <SidebarFooter class="border-t-1 border-t-border w-full h-[var(--app-footer-height)] flex flex-row justify-between items-center">
         <Button
           class="cursor-pointer text-primary scale-90"
           variant="ghost"

@@ -28,7 +28,7 @@ const gridState = import.meta.hot ? import.meta.hot.data.gridState: { gridApi: n
 const watchers = ref<(() => void)[]>([])
 
 // rows' lines
-const rowHeight = ref(window.innerWidth < 769 ? 119 : 96);
+const rowHeight = ref(window.innerWidth < 769 ? 119 : 97);
 // const rowPadding = ref(window.innerWidth < 769 ? 5 : 3);
 
 let resizeTimeout: NodeJS.Timeout;
@@ -37,7 +37,7 @@ let resizeTimeout: NodeJS.Timeout;
 const handleResize = () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    const newHeight = window.innerWidth < 769 ? 119 : 95;
+    const newHeight = window.innerWidth < 769 ? 119 : 97;
     if (newHeight !== rowHeight.value) {
       rowHeight.value = newHeight;
     }
@@ -112,8 +112,8 @@ const colDefs = computed<ColDef[]>(() => [
     wrapText: true,
     cellStyle: { 
       'clip-path': `inset(var(--app-xs-spacing) 0px var(--app-sm-spacing))`,
-      'padding-top': '0.6rem',
-      'padding-bottom': '0.5rem'
+      'padding-top': 'var(--app-sm-spacing)',
+      'padding-bottom': 'var(--app-sm-spacing)'
     },
     headerComponent: Icon,
     headerComponentParams: { icon: BriefcaseBusiness },
@@ -329,17 +329,17 @@ watch (() => [onboardingState.value.currentStepIndex, onboardingState.value.isAc
   }
 })
 
-import TagsSidebar from '@/components/_Tags.vue'
+import TagsSidebar from '@/components/Tags.vue'
 import Loading from '@/components/Loading.vue'
 </script>
 <template>
   <OnboardingTooltip step-id="grid"><div :style="{'top':3.6*rowHeight + 'px'}" class="fixed top-[calc] left-[50%] -translate-x-[-50%]"></div></OnboardingTooltip>
 
-  <div class="flex w-full h-full">
-    <div class="flex-1 h-full flex flex-col transition-all duration-500 ease-in-out">
+  <div class="flex w-full h-full relative border-t-1 border-t-border">
+    <div class="flex-1 h-full flex flex-col transition-all duration-500 ease-in-out ">
       <AgGridVue
         :class="{'pointer-events-none': !gridUnlocked}"
-        class="ag-theme-container h-full grow-1"
+        class="ag-theme-container h-full grow-1 "
         :theme="currentTheme"
         :columnDefs="colDefs"
         :defaultColDef="defaultColDef"
@@ -360,14 +360,18 @@ import Loading from '@/components/Loading.vue'
         @row-clicked="onRowClicked"
         :loadingOverlayComponent="Loading"
       />
-      <div class="border-t-1 border-t-border h-[var(--app-footer-height)] w-full bg-background flex justify-center items-center p-3 text-primary text-base font-light">
+      <div class="border-t-1 border-t-border h-[var(--app-footer-height)] py-[1rem] w-full bg-background flex justify-center items-center text-sm font-light">
         <!-- todo: acts up in safari -->
         {{ startNumber }} to {{  endNumber }} of {{ lastNumberString }}
       </div>
     </div>
+    <TagsSidebar />
   </div>
 </template>
 <style scoped>
+:deep(.ag-header) {
+  border: 0;
+}
 :deep(.row-interacted) {
   user-select: none;
 }

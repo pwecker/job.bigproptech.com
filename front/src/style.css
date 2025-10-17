@@ -45,12 +45,12 @@
 }
 
 :root {
-  --app-header-height: 3.5em;
-  --app-footer-height: 2.5em;
+  --app-header-height: 3.5rem;
+  --app-footer-height: 2.5rem;
 
   --app-xs-spacing : 0.35em;
-  --app-sm-spacing : 1em;
-  --app-md-spacing : 1.5em;
+  --app-sm-spacing : 0.6em;
+  --app-md-spacing : 1.6em;
   --app-lg-spacing : 2em;
   --app-xl-spacing : 4em;
 
@@ -126,7 +126,6 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;

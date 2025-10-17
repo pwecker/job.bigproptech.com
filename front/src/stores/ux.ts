@@ -19,14 +19,15 @@ export type UXStore = {
   toggleCategory: (badge: CategoryBadge) => void
   isActiveCategory: (badge: CategoryBadge) => boolean
 
-  // tags
+  // drawer
   toggleDrawer: () => void
   drawerOpen: Ref<boolean>
 
+  // sidebar
   sidebarOpen: Ref<boolean>
 }
 
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 
 // dark mode
 import { useDark, useToggle } from '@vueuse/core'
@@ -73,10 +74,14 @@ async function waitForFonts(timeoutMs = 690) {
 }
 
 // sidebar, drawer
-const drawerOpen: Ref<boolean> = ref(true)
-const sidebarOpen: Ref<boolean> = ref(true)
+import { useAuthStore } from '@/stores/auth'
 
 export const useUXStore = defineStore('ux', (): UXStore => {
+  const authStore = useAuthStore()
+  const { isAuthenticated } = storeToRefs(authStore)
+  const drawerOpen: Ref<boolean> = ref(false)
+  const sidebarOpen: Ref<boolean> = ref(isAuthenticated.value)
+
   function setDark(value: boolean) {
     isDark.value = value
   }

@@ -19,17 +19,6 @@ const handleScrollCapture = (event: UIEvent) => {
   }
 }
 
-// site flow
-import { useUXStore } from '@/stores/ux'
-const uxStore = useUXStore()
-const { bottomed, drawerOpen, sidebarOpen } = storeToRefs(uxStore)
-import { onMounted } from 'vue'
-onMounted(() => {
-  if ((route.name === 'grid' && isAuthenticated.value) || !route.meta.showHero) {
-    bottomed.value = true
-  }
-})
-
 // user flow
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
@@ -38,6 +27,31 @@ const { fullTeased, isAuthenticated } = storeToRefs(authStore)
 const forceLogin = computed(() => {
   // todo: && !forceLoginPrompt
   return fullTeased.value && !isAuthenticated.value
+})
+
+
+// site flow
+import { nextTick } from 'vue'
+import { useUXStore } from '@/stores/ux'
+const uxStore = useUXStore()
+const { bottomed, drawerOpen, sidebarOpen } = storeToRefs(uxStore)
+import { onMounted } from 'vue'
+function updateBottomed() {
+  if ((route.name === 'grid' && isAuthenticated.value) || !route.meta.showHero) {
+    bottomed.value = true
+  } else {
+    bottomed.value = false
+  }
+}
+
+onMounted(async () => {
+  await nextTick()
+  updateBottomed()
+})
+
+// also react when route or auth changes
+watch([() => route.name, () => isAuthenticated.value], updateBottomed, {
+  immediate: true,
 })
 
 // onboarding
@@ -105,7 +119,7 @@ import {
   <div class="relative flex-1 z-0 bg-background">
     <OnboardingProvider :steps="onboardingSteps" :auto-start="false">
       <Sidebar>
-        <header class="px-1 pr-2 h-[var(--app-header-height)] flex items-center justify-between z-0">
+        <header class="px-[var(--app-sm-spacing)] h-[var(--app-header-height)] flex items-center justify-between z-0">
           <OnboardingTooltip step-id="sidebar">
             <!-- todo: posb race condition in :class -->
             <SidebarTrigger :class="{ 'bg-secondary': sidebarOpen, 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
