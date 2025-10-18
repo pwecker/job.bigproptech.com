@@ -89,7 +89,7 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
     <!-- location -->
     <span class="font-light dark:font-light text-muted-foreground">{{ params.value.location }}</span>
 
-    <Badge variant="secondary">{{ params.value?.segment?.name }}</Badge>
+    <Badge variant="outline" class="border-border text-muted-foreground ml-0.5">{{ params.value?.segment?.name }}</Badge>
 
     <!-- distance -->
     <!--

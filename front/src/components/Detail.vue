@@ -130,7 +130,7 @@ import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 
           <!-- apply options -->
           <div class="pt-[var(--app-xs-spacing)] portrait:p-0 flex portrait:flex-row portrait:flex-wrap overflow-x-auto flex-col leading-[var(--app-sm-spacing)]">
-            <span class="portrait:w-full"><Badge v-for="segment in data?.segments" variant="secondary">{{ segment.name }}</Badge></span>
+            <span class="portrait:w-full"><Badge v-for="segment in data?.segments" variant="outline" class="border-border text-muted-foreground ml-0.5">{{ segment.name }}</Badge></span>
             <div v-for="option in data?.apply_options" class="font-light">
               <a @click.stop="" class="w-full lg:text-sm text-xs whitespace-nowrap hover:underline" :href="option.apply_link" target="_blank">[ {{ option.publisher }} ]</a>
             </div>
