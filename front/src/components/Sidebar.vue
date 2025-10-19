@@ -44,7 +44,7 @@ import { Info } from 'lucide-vue-next'
 </script>
 <template>
   <SidebarProvider v-model:open="sidebarOpen" :key="isAuthenticated + ''" class="h-full w-full select-none">
-    <Sidebar class="border-r-border">
+    <Sidebar class="border-border">
       <SidebarHeader class="pl-2.5 h-[var(--app-header-height)] flex justify-center">
         <BriefcaseBusiness class="scale-65 text-primary"/>
       </SidebarHeader>
@@ -124,17 +124,7 @@ import { Info } from 'lucide-vue-next'
   </SidebarProvider>
 </template>
 <style>
-/* override shadcn's internal fixed layout */
-/* [data-slot="sidebar-wrapper"] [data-slot="sidebar"] {
-  position:relative
+[data-slot="sidebar"] {
+  border: none !important;
 }
-:deep(.sidebar) {
-  opacity: 0.4;
-  position: relative !important;
-  height: auto !important;
-  top: auto !important;
-}
-:deep(.sidebar-provider) {
-  position: relative !important;
-} */
 </style>
