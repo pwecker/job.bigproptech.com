@@ -281,14 +281,13 @@ import { watchOnce } from '@vueuse/core'
 </template>
 <style scoped>
 
-.card {
-  width: calc(162vh - 500px);
-  height: calc(100vh - 200px);
-}
-
-.cardstack {
+/* .cardstack {
   width: calc(92% - (var(--app-xl-spacing)));
   height: calc(100% - ((var(--app-xl-spacing)) + (var(--app-sm-spacing) + var(--app-header-height) + var(--app-footer-height))));
+} */
+.cardstack {
+  width: calc(100% - var(--app-xl-spacing));
+  height: calc(100% - var(--app-xl-spacing));
 }
 
 /* card 0 */
