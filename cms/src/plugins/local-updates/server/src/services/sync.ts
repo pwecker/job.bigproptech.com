@@ -69,14 +69,37 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     return mapping;
   }
 
+  function validate(value: any, def: any): boolean {
+
+    if (!value) return false;
+
+    switch(def.type) {
+      case 'string':
+        if (typeof value === 'string') return true;
+      case 'decimal':
+        if (Number.isInteger(value)) return true;
+        break;
+      case 'boolean':
+        if (typeof value === 'boolean') return true;
+        break;
+      case 'json':
+        if (typeof value === 'object') return true;
+      default:
+        return true;
+    }
+
+    return false;
+  }
+
   async function createOrUpdateByMapping(documentId: string, map: SyncMap, mongoDoc: any) {
     const { collection, key, fields } = map;
     
     const mappedData: Record<string, any> = {};
+    const schema = strapi.contentTypes[map.collection.target];
 
     for (const [strapiField, mapping] of Object.entries(fields)) {
       const syncData = resolveMapping(mapping, mongoDoc);
-      if (syncData) mappedData[strapiField] = syncData;
+      if (validate(syncData, schema.attributes[strapiField])) mappedData[strapiField] = syncData;
       else delete mappedData[strapiField];
     }
 
