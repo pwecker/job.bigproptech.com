@@ -15,9 +15,25 @@ onMounted(() => {
 })
 
 import { ref, reactive, type Ref } from 'vue'
-// email
+
+// email login
+type SubmitState = 'idle' | 'waiting' | 'success' | 'warn' | 'error';
+
+interface SubmitResponse {
+  state: SubmitState;
+  message: string;
+  retryable: boolean;
+}
+
+const responseMap: Record<number, SubmitResponse> = {
+  200: { state: 'success', message: 'Check email for login link.', retryable: false },
+  400: { state: 'error', message: 'Email Service unavailable.', retryable: false },
+  503: { state: 'warn', message: 'Invalid email address.', retryable: true },
+  499: { state: 'error', message: 'Unexpected response.', retryable: true },
+}
+
 const emailSubmitted = ref(false)
-const submitStatus:Ref<string | null> = ref(null)
+const submitResponse = ref<SubmitResponse | null>(null)
 const emailSent = ref(false)
 const formData = reactive({
   email: ''
@@ -26,7 +42,7 @@ const formData = reactive({
 async function handleSubmit () {
   if (emailSubmitted.value) return
   emailSubmitted.value = true
-  submitStatus.value = 'Sending Email Link...'
+  submitResponse.value = { state: 'waiting', message: 'Sending...', retryable: false }
   try {
     const token = await execute('email_login')
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/email-login`, {
@@ -39,10 +55,14 @@ async function handleSubmit () {
       })
     })
 
-    submitStatus.value = response.status === 200 ? 'Check Email for Link' : 'Something went wrong'
-    emailSent.value = true
+    submitResponse.value = responseMap[response.status] || responseMap[499];
+    emailSent.value = submitResponse.value.state === 'success';
   } catch (err) {
-    emailSubmitted.value = false
+    submitResponse.value = responseMap[499];
+  } finally {
+    if (submitResponse.value.retryable) {
+      setTimeout(() => { emailSubmitted.value = false }, 5000)
+    }
   }
 }
 
@@ -161,18 +181,15 @@ import { Spinner } from './ui/spinner'
                 />
               </div>
               <span class="relative">
-                <div v-if="emailSubmitted && emailSent" @click="emailSubmitted = false; emailSent = false" class="absolute h-full right-[var(--app-md-spacing)] flex items-center justify-end text-xs text-muted-foreground hover:text-primary">
-                  <span class="hover:underline cursor-pointer dark:text-background dark:z-1 dark:font-medium">Try again?</span>
-                </div>
-              <Button type="submit" :disabled="!ready || emailSubmitted" class="w-full bg-ring text-secondary cursor-pointer">
-                <span v-if="!ready">reCaptcha...</span>
-                <span v-else-if="emailSubmitted" class="flex items-center text-primary">
-                  <Spinner v-if="!emailSent" class="mr-[var(--app-xs-spacing)]" />
-                  {{ submitStatus }}
-                </span>
-                <span v-else>Send</span>
-              </Button>
-            </span>
+                <Button type="submit" :disabled="!ready || emailSubmitted || (submitResponse && !submitResponse.retryable)" :style="`background-color:${formData.email.length > 0 ? 'var(--muted-foreground)' : 'var(--ring)'}`" class="w-full text-secondary cursor-pointer hover:bg-foreground! disabled:bg-background! disabled:border-1 disabled:border-border">
+                  <span v-if="!ready">reCaptcha...</span>
+                  <span v-else-if="emailSubmitted" class="flex items-center text-primary">
+                    <Spinner v-if="!emailSent && (submitResponse && submitResponse.state === 'waiting')" class="mr-[var(--app-xs-spacing)]" />
+                    <span v-if="submitResponse">{{ submitResponse.message }}</span>
+                  </span>
+                  <span v-else>Send</span>
+                </Button>
+              </span>
             </div>
             <!-- <div class="text-center text-sm">
               Don't have an account?
