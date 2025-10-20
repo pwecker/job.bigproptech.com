@@ -7,6 +7,16 @@ export default {
         .service('api::custom-route.custom')
         .handleEmailLogin(to);
 
+      if (result.error) {
+        ctx.status = 400;
+        ctx.body = { success: false, error: result.error };
+        return;
+      } else if (result.warn) {
+        ctx.status = 503;
+        ctx.body = { success: false, warn: result.warn };
+        return;
+      }
+  
       ctx.status = 200;
       ctx.body = { success: true, result };
     } catch (err) {
@@ -16,7 +26,6 @@ export default {
   },
   async magicLink(ctx: any) {
     const { token } = ctx.request.body?.token || ctx.request.query;
-    console.log(token)
     if (!token) return ctx.badRequest('Missing token');
 
     try {

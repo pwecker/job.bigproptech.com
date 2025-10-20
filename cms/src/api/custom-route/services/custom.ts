@@ -4,6 +4,7 @@ interface EmailLoginReturn {
   email: string
   message?: string
   error?: string
+  warn?: string
 }
 
 interface MagicLinkReturn {
@@ -17,6 +18,20 @@ interface MagicLinkReturn {
 export default ({ strapi }) => ({
   async handleEmailLogin(email: string): Promise<EmailLoginReturn> {
     try {
+      const smtpUser = process.env.SMTP_USERNAME;
+      const smtpPass = process.env.SMTP_PASSWORD;
+      const smtpHost = process.env.SMTP_HOST;
+
+      if (!smtpUser || !smtpPass || !smtpHost) {
+        strapi.log.error('Email configuration missing required SMTP env variables');
+        return { email, error: 'Email service misconfigured' };
+      }
+
+      // todo: get actual email failed send from plugin
+      if (!(email.includes('@') && email.includes('.'))) {
+        return { email, warn: 'Invalid email address' };
+      }
+
       // todo: hash
       const token = crypto.randomBytes(32).toString('hex');
       const expiresInSeconds = 15 * 60;
@@ -25,17 +40,23 @@ export default ({ strapi }) => ({
       
       const frontUrl = process.env.FRONT_URL || 'http://localhost:5173';
       const link = `${frontUrl}/auth/email?token=${token}`;
-
-      await strapi.plugin('email').service('email').send({
+      const emailPayload = {
         to: email,
         subject: 'Login Link',
         html: `<p>Click <a href="${link}">here</a> to log in. This link expires in 15 minutes.</p>`,
-      });
+      };
+
+      try {
+        await strapi.plugin('email').service('email').send(emailPayload);
+      } catch (sendErr) {
+        strapi.log.warn('Nodemailer send failed:', sendErr);
+        return { email, warn: 'Failed to send login email' };
+      }
 
       return { email, message: 'Login link sent successfully' };
     } catch (err) {
-      strapi.log.error('Error sending email:', err);
-      return { email, error: 'Failed to send email' };
+      strapi.log.error('Error in handleEmailLogin:', err);
+      return { email, error: 'Unexpected error while handling email login' };
     }
   },
   async handleMagicLink(token: string, { consume = true } = {}): Promise<MagicLinkReturn> {
