@@ -4,7 +4,22 @@ import { computed } from 'vue'
 import { useInteractionStore } from '@/stores/interaction'
 const interactionStore = useInteractionStore()
 
-const all = computed(() => interactionStore.allInteractions)
+const recent = computed(() => 
+  interactionStore.allInteractions.sort((a, b) => {
+    const timeA = a.updatedAt || a.createdAt
+    const timeB = b.updatedAt || b.createdAt
+    if (timeA && timeB) {
+      if (timeB < timeA) {
+        return -1;
+      }
+      if (timeB > timeA) {
+        return 1;
+      }
+    }
+
+    return 0;
+  })
+)
 const likes = computed(() =>
   interactionStore.allInteractions.filter(i => i.flavor === 'like')
 )
@@ -19,12 +34,11 @@ const likes = computed(() =>
     :title="'Liked'"
   />
 
-  <!-- todo: order by recency -->
-  <!-- all -->
+  <!-- recent -->
   <slot
-    v-if="all.length > 0"
+    v-if="recent.length > 0"
     name="recent"
-    :items="all"
+    :items="recent"
     :title="'Recent'"
   />
 
