@@ -42,7 +42,9 @@ export default ({ strapi }) => ({
       const link = `${frontUrl}/auth/email?token=${token}`;
       const emailPayload = {
         to: email,
+        from: smtpUser,
         subject: 'Login Link',
+        text: `Click ${link} to log in. This link expires in 15 minutes.`,
         html: `<p>Click <a href="${link}">here</a> to log in. This link expires in 15 minutes.</p>`,
       };
 
