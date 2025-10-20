@@ -27,8 +27,8 @@ interface SubmitResponse {
 
 const responseMap: Record<number, SubmitResponse> = {
   200: { state: 'success', message: 'Check email for login link.', retryable: false },
-  400: { state: 'error', message: 'Email Service unavailable.', retryable: false },
-  503: { state: 'warn', message: 'Invalid email address.', retryable: true },
+  400: { state: 'error', message: 'Email service unavailable.', retryable: false },
+  503: { state: 'warn', message: 'Email send error.', retryable: true },
   499: { state: 'error', message: 'Unexpected response.', retryable: true },
 }
 
