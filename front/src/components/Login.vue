@@ -17,6 +17,7 @@ onMounted(() => {
 import { ref, reactive, type Ref } from 'vue'
 
 // email login
+const emailEnabled = import.meta.env['VITE_EMAIL_LOGIN'] === 'true'
 type SubmitState = 'idle' | 'waiting' | 'success' | 'warn' | 'error';
 
 interface SubmitResponse {
@@ -163,12 +164,12 @@ import { Spinner } from './ui/spinner'
                 </Button>
               </span>
             </div>
-            <div class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <div :class="[emailEnabled ? '' : 'opacity-20']" class="select-none relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span class="relative z-10 bg-background px-2 text-muted-foreground">
                 or send a login link to
               </span>
             </div>
-            <div class="grid gap-6 transition-opacity">
+            <div :class="[emailEnabled ? '' : 'opacity-20 pointer-events-none select-none']" class="grid gap-6 transition-opacity">
               <div class="grid gap-2 min-h-[3.6em] text-muted-foreground">
                 <Label html-for="email">Email</Label>
                 <Input
