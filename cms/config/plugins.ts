@@ -6,22 +6,21 @@ export default ({ env }) => {
       enabled: true,
       resolve: './src/plugins/local-updates'
     },
-    email: {
+    'email': {
       config: {
         provider: 'nodemailer',
         providerOptions: {
           host: env('SMTP_HOST', 'smtp.gmail.com'),
-          port: 465,
-          secure: true,
+          port: isSecure ? 465 : 587,
           auth: {
             user: env('SMTP_USERNAME'),
-            pass: env('SMTP_PASSWORD'),
+            pass: env('SMTP_PASSWORD')
           },
-          tls: { family: 4 }, // force IPv4
+          secure: isSecure
         },
         settings: {
           defaultFrom: env('EMAIL_DEFAULT_FROM', 'no-reply@example.com'),
-          defaultReplyTo: env('EMAIL_DEFAULT_REPLY_TO', 'support@example.com'),
+          defaultReplyTo: env('EMAIL_DEFAULT_REPLY_TO', 'support@example.com')
         },
       },
     }
