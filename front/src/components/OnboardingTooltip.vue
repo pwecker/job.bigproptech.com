@@ -27,10 +27,10 @@ import {
 </script>
 <template>
   <Popover :open="isActive">
-    <PopoverTrigger :class="[isActive ? 'bg-muted/70' : '']" as-child>
+    <PopoverTrigger :class="[isActive ? 'bg-muted/70!' : '']" as-child>
       <slot />
     </PopoverTrigger>
-    <PopoverContent class="w-80">
+    <PopoverContent class="w-80 border-border">
       <div class="space-y-4">
         <div>
           <h3 class="font-semibold text-lg mb-2">{{ step?.title }}</h3>
@@ -54,6 +54,7 @@ import {
             </Button>
             
             <Button
+              v-if="onboarding.state.value.currentStepIndex < onboarding.state.value.steps.length - 1"
               variant="ghost"
               size="sm"
               @click="onboarding.skip()"

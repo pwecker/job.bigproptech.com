@@ -62,17 +62,17 @@ const onboardingSteps: OnboardingStep[] = [
   {
     id: 'grid',
     title: 'Yes/No UI',
-    content: 'Click them to swipe through'
+    content: 'Clicking items opens up a detailed view in order to swipe left/right.'
   },
   {
     id: 'sidebar',
     title: 'Liked items',
-    content: 'They save to the sidebar'
+    content: 'Items are stored categorized in the sidebar.'
   },
   {
     id: 'tags',
     title: 'Tags',
-    content: 'View all tags'
+    content: 'All available item meta tags.'
   }
 ]
 
