@@ -22,6 +22,27 @@ if (projectKey && openreplayEnabled) {
   pinia.use(createOpenreplayPiniaPlugin(tracker))
 }
 
+// gtag
+import { configure, event } from 'vue-gtag'
+const gtagEnabled = import.meta.env['VITE_GTAG_ENABLED'] === 'true'
+const gtagId = import.meta.env['VITE_GTAG_ID'] || 'G-XXXXXXX'
+if (gtagEnabled) {
+  configure({
+    tagId: gtagId,
+    config: {
+      send_page_view: false
+    }
+  })
+
+  router.afterEach((to, from) => {
+    if (to.name !== 'grid' || !from.name) {
+      event('page_impression', {
+        page_path: to.fullPath
+      })
+    }
+  })
+}
+
 app.use(pinia)
 app.use(router)
 
