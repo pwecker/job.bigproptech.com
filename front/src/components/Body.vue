@@ -124,15 +124,17 @@ import {
             <!-- todo: posb race condition in :class -->
             <SidebarTrigger :class="{ 'bg-secondary': sidebarOpen, 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
           </OnboardingTooltip>
-          <Button
-            class="cursor-pointer text-primary scale-90"
-            :class="[drawerOpen ? 'bg-secondary' : 'bg-background']"
-            variant="ghost"
-            size="icon"
-            @click="uxStore.toggleDrawer()"
-          >
-            <Tags />
-          </Button>
+          <OnboardingTooltip step-id="tags">
+            <Button
+              class="cursor-pointer text-primary scale-90"
+              :class="[drawerOpen ? 'bg-secondary' : 'bg-background']"
+              variant="ghost"
+              size="icon"
+              @click="uxStore.toggleDrawer()"
+            >
+              <Tags />
+            </Button>
+          </OnboardingTooltip>
         </header>
 
         <router-view/>
