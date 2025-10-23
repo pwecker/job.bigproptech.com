@@ -113,6 +113,8 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     }
   
     const { target } = collection;
+
+    console.log(mappedData)
   
     try {
       const existing = await strapi.documents(collection.target).findFirst({
