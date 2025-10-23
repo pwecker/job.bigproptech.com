@@ -388,9 +388,9 @@ export interface ApiDataData extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    employer_logo: Schema.Attribute.String;
+    employer_logo: Schema.Attribute.Text;
     employer_name: Schema.Attribute.String;
-    employer_website: Schema.Attribute.String;
+    employer_website: Schema.Attribute.Text;
     geohash: Schema.Attribute.String;
     geojson: Schema.Attribute.JSON &
       Schema.Attribute.CustomField<

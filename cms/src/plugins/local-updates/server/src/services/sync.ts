@@ -70,25 +70,21 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
   }
 
   function validate(value: any, def: any): boolean {
-
     if (!value) return false;
-
-    switch(def.type) {
+    switch (def.type) {
       case 'string':
-        if (typeof value === 'string') return true;
+        return typeof value === 'string' && value.length <= 255;
+      case 'text':
+        return typeof value === 'string';
       case 'decimal':
-        if (Number.isInteger(value)) return true;
-        break;
+        return typeof value === 'number' && !isNaN(value);
       case 'boolean':
-        if (typeof value === 'boolean') return true;
-        break;
+        return typeof value === 'boolean';
       case 'json':
-        if (typeof value === 'object') return true;
+        return typeof value === 'object' && value !== null;
       default:
         return true;
     }
-
-    return false;
   }
 
   async function createOrUpdateByMapping(documentId: string, map: SyncMap, mongoDoc: any) {
@@ -113,13 +109,6 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     }
   
     const { target } = collection;
-
-    for (const key in mappedData) {
-      console.log('---')
-      console.log(key)
-      console.log(mappedData[key])
-      console.log('---')
-    }
   
     try {
       const existing = await strapi.documents(collection.target).findFirst({
