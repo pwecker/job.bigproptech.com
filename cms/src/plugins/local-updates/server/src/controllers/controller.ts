@@ -48,6 +48,22 @@ const controller: Core.Controller = {
     }
   },
 
+  async delete(ctx) {
+    const { documentId } = ctx.request.body.payload;
+    const deleter = strapi.plugin('local-updates').service('deleter') as DeleterService;
+
+    try {
+      const report = await deleter.deleteSegmentAndRelations(documentId);
+      ctx.body = { deleted: report };
+      ctx.status = 200;
+    } catch (err) {
+      console.log(err)
+      console.error(err);
+      ctx.body = { error: 'Failed to delete documents' };
+      ctx.status = 500;
+    }
+  },
+
   async tagOne(ctx) {
     try {
       if (!TAGS_ON) throw new Error('tags off');
@@ -148,23 +164,7 @@ const controller: Core.Controller = {
       strapi.log.error('Health proxy error:', error);
       return ctx.internalServerError('Failed to check orchestrator health');
     }
-  },
-
-  async delete(ctx) {
-    const { documentId } = ctx.request.body.payload;
-    const deleter = strapi.plugin('local-updates').service('deleter') as DeleterService;
-
-    try {
-      const report = await deleter.deleteSegmentAndRelations(documentId);
-      ctx.body = { deleted: report };
-      ctx.status = 200;
-    } catch (err) {
-      console.log(err)
-      console.error(err);
-      ctx.body = { error: 'Failed to delete documents' };
-      ctx.status = 500;
-    }
-  },
+  }
 };
 
 export default controller;
