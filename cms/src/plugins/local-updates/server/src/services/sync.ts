@@ -38,34 +38,98 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     return client;
   }
 
-  function resolveMapping(mapping: any, mongoDoc: any): any {
-    if (typeof mapping === "string") {
-      // Case 1: direct path lookup
-      return _get(mongoDoc, mapping);
-    }
-  
-    if (Array.isArray(mapping)) {
-      // Case 2: concatenate array of literals + paths
-      return mapping
-        .map((part) => {
-          if (typeof part === "string" && part.includes(".")) {
-            return _get(mongoDoc, part) ?? "";
+  type Format = 'UTCDATE' | 'NONE'
+
+  function formatValue(value: any, formatType: Format = 'NONE'): any {
+    if (value == null) return value;
+
+    const formatStringValue = (str: string): string => {
+      if (formatType === 'UTCDATE') {
+        const date = new Date(str);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString();
+        }
+
+        const match = str.match(/\b([A-Z][a-z]{2,8}\s+\d{1,2},\s*\d{4})\b/);
+        if (match) {
+          const extracted = new Date(match[0]);
+          if (!isNaN(extracted.getTime())) {
+            return str.replace(match[0], extracted.toISOString());
           }
-          return part; // literal
-        })
-        .join("");
+        }
+      }
+
+      return str;
+    };
+
+    if (typeof value === 'string') {
+      return formatStringValue(value);
     }
-  
-    if (typeof mapping === "object" && mapping !== null) {
-      // Case 3: recursively resolve object mappings
+
+    if (Array.isArray(value)) {
+      return value.map((v) => formatValue(v, formatType));
+    }
+
+    if (typeof value === 'object' && value !== null) {
       const obj: Record<string, any> = {};
-      for (const [key, subMapping] of Object.entries(mapping)) {
-        obj[key] = resolveMapping(subMapping, mongoDoc);
+      for (const [key, v] of Object.entries(value)) {
+        obj[key] = formatValue(v, formatType);
       }
       return obj;
     }
+
+    return value;
+  }
+
+  function resolveMappingWithFormat(mapping: any, mongoDoc: any): any {
+    if (typeof mapping === "string") {
+
+      let formatType: Format = 'NONE';
+      let path = mapping;
+      
+      const split = mapping.split('!');
+      if (split.length > 1) {
+        formatType = split[0] as Format;
+        path = split[1];
+      }
+      
+      const value = _get(mongoDoc, path);
+      return formatValue(value, formatType);
+    }
   
-    // Fallback
+    if (Array.isArray(mapping)) {
+      const result = mapping
+        .map((part) => {
+          if (typeof part === 'string') {
+            let formatType: Format = 'NONE';
+            let path = part;
+
+            const split = part.split('!');
+            if (split.length > 1) {
+              formatType = split[0] as Format;
+              path = split[1];
+            }
+
+            if (path.includes('.')) {
+              const value = _get(mongoDoc, path);
+              return formatValue(value, formatType) ?? '';
+            }
+          }
+          return part;
+        })
+        .join('');
+      
+      return result;
+    }
+  
+    if (typeof mapping === "object" && mapping !== null) {
+      const obj: Record<string, any> = {};
+      for (const [key, subMapping] of Object.entries(mapping)) {
+        obj[key] = resolveMappingWithFormat(subMapping, mongoDoc);
+      }
+      return obj;
+    }
+
     return mapping;
   }
 
@@ -94,7 +158,7 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     const schema = strapi.contentTypes[map.collection.target];
 
     for (const [strapiField, mapping] of Object.entries(fields)) {
-      const syncData = resolveMapping(mapping, mongoDoc);
+      const syncData = resolveMappingWithFormat(mapping, mongoDoc);
       if (validate(syncData, schema.attributes[strapiField])) mappedData[strapiField] = syncData;
       else delete mappedData[strapiField];
     }
