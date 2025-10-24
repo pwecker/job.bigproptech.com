@@ -87,7 +87,7 @@ export function createOnboarding(steps: OnboardingStep[]): OnboardingReturn {
     localStorage.removeItem('onboarding-completed')
   }
 
-  localStorage.removeItem('onboarding-completed')
+  // localStorage.removeItem('onboarding-completed')
 
   return {
     state,
