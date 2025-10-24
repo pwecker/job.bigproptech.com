@@ -34,7 +34,7 @@ const useFetchClient = () => {
 
 interface UpdateButtonProps {
   label: string;
-  actionType: 'sync' | 'update' | 'tag';
+  actionType: 'sync' | 'update' | 'tag' | 'delete';
   onResult: (result: any) => void;
   onError: (error: string) => void;
   payloadBuilder?: (values: any, actionType: string) => any;
@@ -56,6 +56,13 @@ const DataButton: React.FC<UpdateButtonProps> = ({
     if (!values?.documentId) {
       onError('No entity ID found');
       return;
+    }
+
+    if (actionType === 'delete') {
+      const confirmed = window.confirm(
+        'Sure you want to delete? This cannot be undone.'
+      );
+      if (!confirmed) return;
     }
 
     setLoading(true);

@@ -25,5 +25,14 @@ export default [
       update: {auth: true},
       policies: [],
     },
+  },
+  {
+    method: 'POST',
+    path: '/delete',
+    handler: 'controller.delete',
+    config: {
+      update: {auth: true},
+      policies: [],
+    },
   }
 ];

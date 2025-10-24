@@ -1,6 +1,5 @@
 import type { Core } from '@strapi/strapi';
-import { type TagServiceReturn, SyncService } from '../services'
-
+import type { TagServiceReturn, SyncService, DeleterService } from '../services'
 
 const TAGS_ON = process.env.TAGS_ON === 'true';
 const TAGS_CAP = Number(process.env.TAGS_CAP) || 1;
@@ -149,7 +148,23 @@ const controller: Core.Controller = {
       strapi.log.error('Health proxy error:', error);
       return ctx.internalServerError('Failed to check orchestrator health');
     }
-  }
+  },
+
+  async delete(ctx) {
+    const { documentId } = ctx.request.body.payload;
+    const deleter = strapi.plugin('local-updates').service('deleter') as DeleterService;
+
+    try {
+      const report = await deleter.deleteSegmentAndRelations(documentId);
+      ctx.body = { deleted: report };
+      ctx.status = 200;
+    } catch (err) {
+      console.log(err)
+      console.error(err);
+      ctx.body = { error: 'Failed to delete documents' };
+      ctx.status = 500;
+    }
+  },
 };
 
 export default controller;

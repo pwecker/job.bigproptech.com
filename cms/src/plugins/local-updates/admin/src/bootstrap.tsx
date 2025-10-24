@@ -60,6 +60,11 @@ const bootstrap = (app: any) => {
         payload: {},
       });
 
+      const buildDeletePayload = (values: any, actionType: string) => ({
+        type: actionType,
+        payload: { documentId: values.documentId },
+      });
+
       // todo: add delete segment function
 
       return (
@@ -68,6 +73,7 @@ const bootstrap = (app: any) => {
             <DataButton label="Sync" actionType="sync" onResult={handleResult} onError={handleError} payloadBuilder={buildSyncPayload}/>
             <DataButton label="Update" actionType="update" onResult={handleResult} onError={handleError} payloadBuilder={buildUpdatePayload}/>
             <DataButton label="Tag" actionType="tag" onResult={handleResult} onError={handleError} payloadBuilder={buildTagPayload}/>
+            <DataButton label="Delete" actionType="delete" onResult={handleResult} onError={handleError} payloadBuilder={buildDeletePayload}/>
           </div>
           <UpdateStatus 
             result={result} 
