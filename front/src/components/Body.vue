@@ -12,7 +12,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 const offset = ref<number>(0)
 const handleScrollCapture = (event: UIEvent) => {
   const target = event.target as HTMLElement
-  if(target.getAttribute('data-slot') === 'scroll-area-viewport') {
+  const parent = target.parentNode as HTMLElement
+  if (parent && parent.getAttribute('data-name') === 'mainScroll') {
     offset.value = target.scrollTop
     const maxScroll = target.scrollHeight - target.clientHeight
     bottomed.value = target.scrollTop >= maxScroll - 1
@@ -108,6 +109,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
     { 'overflow-hidden': forceLogin }
   ]"
   @scrollCapture="handleScrollCapture"
+  data-name="mainScroll"
 >
 
   <!-- hero -->
