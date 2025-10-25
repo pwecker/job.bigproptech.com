@@ -37,6 +37,11 @@ watch(route, (to) => {
 import { useOnboarding } from '@/composables/useOnboarding'
 const onboarding = useOnboarding()
 
+// interactions
+import { type InteractionDateGroup, useInteractionStore } from '@/stores/interaction'
+const interactionStore = useInteractionStore()
+const { interactionsByDate } = storeToRefs(interactionStore)
+
 // components
 import { BriefcaseBusiness } from 'lucide-vue-next'
 import { 
@@ -48,13 +53,19 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
+  SidebarMenuSub,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarFooter,
 } from '@/components/ui/sidebar'
-import { Info } from 'lucide-vue-next'
-
-import Interactions from '@/components/Interactions.vue'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import { Info, Plus, Minus } from 'lucide-vue-next'
 
 </script>
 <template>
@@ -65,42 +76,63 @@ import Interactions from '@/components/Interactions.vue'
       </SidebarHeader>
       <SidebarContent class="text-primary font-light">
 
-        <Interactions>
-        <!-- likes -->
-        <template #liked="{ items, title }">
-          <SidebarGroup>
-            <SidebarGroupLabel class="font-light text-sm text-muted-foreground">{{ title }}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`likes:${i.documentId}`">
-                  <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-sm rounded-none">
-                    <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
-                      {{ i.datum.job_title }}
-                    </RouterLink>
-                  </SidebarMenuButton>
+        <SidebarGroup>
+          <SidebarGroupLabel class="font-light text-sm text-muted-foreground">
+            Interactions
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <Collapsible
+                v-for="(item, index) in interactionsByDate as InteractionDateGroup[]"
+                :key="item.date"
+                :default-open="index === 1"
+                class="group/collapsible"
+              >
+
+                <!-- date group -->
+                <SidebarMenuItem>
+                  <CollapsibleTrigger as-child>
+                    <SidebarMenuButton>
+                      {{ item.date }}
+                      <Plus class="ml-auto group-data-[state=open]/collapsible:hidden" />
+                      <Minus class="ml-auto group-data-[state=closed]/collapsible:hidden" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent v-if="item.interactions.length">
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem class="flex justify-start items-center" v-for="childItem in item.interactions" :key="childItem.datum.job_title">
+                        <SidebarMenuSubButton
+                          class="w-full"
+                          as-child
+                        >
+                          <RouterLink  :to="childItem.datum.documentId">
+                            <span class="truncate">{{ childItem.datum.job_title }}</span>
+                          </RouterLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
                 </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </template>
-        <!-- recent -->
-        <template #recent="{ items, title }">
-          <SidebarGroup>
-            <SidebarGroupLabel class="font-light text-sm text-muted-foreground">{{ title }}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem class="h-[var(--app-md-spacing)]" v-for="i in items" :key="`recent:${i.documentId}`">
-                  <SidebarMenuButton size="sm" class="py-0 font-light dark:font-light text-sm rounded-none">
-                    <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
-                      {{ i.datum.job_title }}
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </template>
-      </Interactions>
+
+                
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <!--
+        v-for="group in interactionsByDate as InteractionDateGroup[]"
+        SidebarGroup
+        SidebarGroupLabel
+        SidebarGroupContent
+        SidebarMenu
+        SidebarMenuItem
+        SidebarMenuButton
+
+        <RouterLink class="whitespace-nowrap text-ellipsis overflow-hidden" :to="i.datum.documentId">
+          {{ i.datum.job_title }}
+        </RouterLink>
+        -->
 
       </SidebarContent>
       <SidebarFooter class="border-t-1 border-t-border w-full h-[var(--app-footer-height)] flex flex-row justify-between items-center">

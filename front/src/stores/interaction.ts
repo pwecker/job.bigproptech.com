@@ -20,6 +20,11 @@ export interface InteractionDatum {
   job_title: string
 }
 
+export interface InteractionDateGroup {
+  date: string
+  interactions: Interaction[]
+}
+
 export interface InteractionInput {
   flavor: InteractionFlavor
   datum: { connect: string }
@@ -31,6 +36,7 @@ export interface InteractionDataReturn {
   error: Ref<string | null>
   interactionsByDatum: ComputedRef<Map<string, Interaction>>
   allInteractions: ComputedRef<Interaction[]>
+  interactionsByDate: ComputedRef<InteractionDateGroup[]>
   refetch: (options?: { headers?: Record<string, string> }) => Promise<Interaction[] | null>
   getFlavor: (datumId: string) => InteractionFlavor | null
   setInteraction: (datumId: string, flavor: InteractionFlavor) => Promise<void>
@@ -154,6 +160,24 @@ export function useInteractionData(): InteractionDataReturn {
 
   const allInteractions = computed(() => Array.from(interactionsByDatum.value.values()))
 
+  const interactionsByDate = computed<{date: string, interactions: Interaction[]}[]>(() => {
+    const grouped = allInteractions.value.reduce<Record<string, Interaction[]>>((acc, cur) => {
+      const date = cur.createdAt?.split('T')[0]
+      if (date) {
+        if (!acc[date]) acc[date] = []
+        acc[date].push(cur)
+      }
+      return acc
+    }, {})
+  
+    return Object.keys(grouped)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()) // newest first
+      .map(date => ({
+        date,
+        interactions: grouped[date],
+      }))
+  })
+
   function getFlavor(datumId: string): InteractionFlavor | null {
     return interactionsByDatum.value.get(datumId)?.flavor ?? null
   }
@@ -234,6 +258,7 @@ export function useInteractionData(): InteractionDataReturn {
     error,
     interactionsByDatum,
     allInteractions,
+    interactionsByDate,
     refetch,
     getFlavor,
     setInteraction,
@@ -271,6 +296,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     error: interactionData.error,
     interactionsByDatum: interactionData.interactionsByDatum,
     allInteractions: interactionData.allInteractions,
+    interactionsByDate: interactionData.interactionsByDate,
     fetchInteractions: () => interactionData.refetch(),
     getFlavor: interactionData.getFlavor,
     setInteraction: interactionData.setInteraction,
