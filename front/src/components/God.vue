@@ -1,8 +1,6 @@
 <script setup lang="ts">
 // data
 import { categoryColors, Categories, type CategorySet } from '@/composables/useTagApi'
-import { type InteractionFlavor } from '@/stores/interaction'
-
 import { type Segment } from '@/composables/useFullApi'
 interface GodColCell {
   datetime: string | null
@@ -24,27 +22,17 @@ const props = defineProps<{
 
 // interacted
 import { computed } from 'vue';
-import { useInteractionStore } from '@/stores/interaction'
+import { useInteractionStore, flavorIcons } from '@/stores/interaction'
 const interactionStore = useInteractionStore()
-const interacted = computed(() => {
+const interactionFlavor = computed(() => {
   const documentId = props.params.value?.documentId
   if (!documentId) return null
 
   return interactionStore.getFlavor(documentId)
 })
 
-function handleInteraction(flavor: InteractionFlavor) {
-  interactionStore.queueInteraction(
-    props.params.value.documentId,
-    props.params.value.title?.join(' ') || '',
-    flavor
-  )
-}
-
 // components / static
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button'
-import { CircleCheck, CircleX } from 'lucide-vue-next'
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 </script>
 <template>
@@ -56,7 +44,7 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
     <Skeleton class="h-[0.9rem] w-[97%] mt-[0.7rem]" />
     <Skeleton class="h-[0.9rem] w-[65%] mt-[0.7rem]" />
   </div>
-  <div :data-interaction="interacted" v-if="params.value.title" class="god-cell leading-[var(--app-md-spacing)] gap-x-1 text-base w-full flex flex-wrap items-center justify-start">
+  <div :data-interaction="interactionFlavor" v-if="params.value.title" class="god-cell leading-[var(--app-md-spacing)] gap-x-1 text-base w-full flex flex-wrap items-center justify-start">
     <!-- age -->
     <span class="font-light mr-1">[{{ params.value.relativeDate }}]</span>
     <div class="font-light text-muted-foreground truncate max-w-[9em]">{{ params.value.datetime }}</div>
@@ -67,18 +55,10 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
     </template>
 
     <!-- interaction -->
-    <Button
-      class="interaction-button--like text-muted-foreground ml-1 cursor-pointer h-full w-auto shrink-0"
-      variant="ghost"
-      size="icon"
-      @click.stop="handleInteraction('like')"
-    ><CircleCheck /></Button>
-    <Button
-      class="interaction-button--dislike text-muted-foreground mr-0.5 cursor-pointer h-full w-auto shrink-0.5"
-      variant="ghost"
-      size="icon"
-      @click.stop="handleInteraction('dislike')"
-    ><CircleX/></Button>
+    <component
+      :is="flavorIcons[interactionFlavor ?? null]"
+      class="text-muted-foreground w-[1em] h-[1em]"
+    />
 
     <!-- employer -->
     <span class="font-light dark:font-light">{{ params.value.employer }}</span>

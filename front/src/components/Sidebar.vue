@@ -67,6 +67,8 @@ import {
 } from '@/components/ui/collapsible'
 import { Info, Plus, Minus } from 'lucide-vue-next'
 
+import Interaction from '@/components/Interaction.vue'
+
 </script>
 <template>
   
@@ -77,7 +79,7 @@ import { Info, Plus, Minus } from 'lucide-vue-next'
       <SidebarContent class="text-primary font-light">
 
         <SidebarGroup>
-          <SidebarGroupLabel class="font-light text-sm text-muted-foreground">
+          <SidebarGroupLabel  v-if="interactionsByDate.length > 0" class="font-light text-sm text-muted-foreground">
             Interactions
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -85,7 +87,7 @@ import { Info, Plus, Minus } from 'lucide-vue-next'
               <Collapsible
                 v-for="(item, index) in interactionsByDate as InteractionDateGroup[]"
                 :key="item.date"
-                :default-open="index === 1"
+                :default-open="index === 0"
                 class="group/collapsible"
               >
 
@@ -100,13 +102,14 @@ import { Info, Plus, Minus } from 'lucide-vue-next'
                   </CollapsibleTrigger>
                   <CollapsibleContent v-if="item.interactions.length">
                     <SidebarMenuSub>
-                      <SidebarMenuSubItem class="flex justify-start items-center" v-for="childItem in item.interactions" :key="childItem.datum.job_title">
+                      <SidebarMenuSubItem class="flex justify-start items-center" v-for="interaction in item.interactions" :key="interaction.datum.job_title">
+                        <Interaction :interaction="interaction"/>
                         <SidebarMenuSubButton
                           class="w-full"
                           as-child
                         >
-                          <RouterLink  :to="childItem.datum.documentId">
-                            <span class="truncate">{{ childItem.datum.job_title }}</span>
+                          <RouterLink class="ml-[var(--app-xs-spacing)]"  :to="interaction.datum.documentId">
+                            <span class="truncate">{{ interaction.datum.job_title }}</span>
                           </RouterLink>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -114,7 +117,6 @@ import { Info, Plus, Minus } from 'lucide-vue-next'
                   </CollapsibleContent>
                 </SidebarMenuItem>
 
-                
               </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>

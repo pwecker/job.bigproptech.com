@@ -4,7 +4,28 @@ import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import type { StrapiQueryOptions } from '@/composables/useApi/strapi'
 
-export type InteractionFlavor = 'like' | 'dislike' | 'seen'
+export const interactionFlavors = [
+  'like',
+  'dislike',
+  'seen',
+  'contacted'
+] as const
+
+export type InteractionFlavor = (typeof interactionFlavors)[number]
+import type { FunctionalComponent } from 'vue'
+import {
+  Heart,
+  ThumbsDown,
+  Eye,
+  MailCheck,
+} from 'lucide-vue-next'
+
+export const flavorIcons: Record<InteractionFlavor, FunctionalComponent> = {
+  like: Heart,
+  dislike: ThumbsDown,
+  seen: Eye,
+  contacted: MailCheck
+}
 
 export interface Interaction {
   documentId: string
@@ -192,7 +213,9 @@ export function useInteractionData(): InteractionDataReturn {
       if (existingDb) {
         const updated = await resource.update(
           existingDb.documentId,
-          { flavor, datum: { connect: datumId } },
+          {
+            flavor,
+            datum: { connect: datumId }          },
           { headers }
         )
         if (updated && data.value) {
