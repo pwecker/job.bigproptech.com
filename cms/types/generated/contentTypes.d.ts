@@ -452,7 +452,9 @@ export interface ApiInteractionInteraction extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     datum: Schema.Attribute.Relation<'manyToOne', 'api::data.data'>;
-    flavor: Schema.Attribute.Enumeration<['like', 'dislike', 'seen']>;
+    flavor: Schema.Attribute.Enumeration<
+      ['like', 'dislike', 'seen', 'contacted']
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

@@ -16,7 +16,8 @@
       "enum": [
         "like",
         "dislike",
-        "seen"
+        "seen",
+        "contacted"
       ]
     },
     "owner": {
