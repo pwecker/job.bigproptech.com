@@ -135,14 +135,21 @@ export default factories.createCoreController('api::interaction.interaction', ({
 
     const existingId = existing.documentId;
     const updates = ctx.request.body.data;
-    const updated = await strapi.documents('api::interaction.interaction').update({
-      documentId: existingId,
-      data: {
-        ...updates,
-        updatedAt: new Date().toISOString()
-      },
-      ...query
-    });
+    const updated = await strapi
+      .documents('api::interaction.interaction')
+      .update({
+        documentId: existingId,
+        data: {
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        },
+        ...query,
+      })
+
+    await strapi
+      .documents('api::interaction.interaction')
+      .publish({ documentId: existingId })
+
     const sanitized = await this.sanitizeOutput(updated, ctx);
     return this.transformResponse(sanitized);
   }
