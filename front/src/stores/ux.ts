@@ -24,7 +24,8 @@ export type UXStore = {
   drawerOpen: Ref<boolean>
 
   // sidebar
-  sidebarOpen: Ref<boolean>
+  sidebarOpen: Ref<boolean | null>
+  setSidebarOpen: (val: boolean) => void
 }
 
 import { defineStore, storeToRefs } from 'pinia'
@@ -80,7 +81,11 @@ export const useUXStore = defineStore('ux', (): UXStore => {
   const authStore = useAuthStore()
   const { isAuthenticated } = storeToRefs(authStore)
   const drawerOpen: Ref<boolean> = ref(false)
-  const sidebarOpen: Ref<boolean> = ref(isAuthenticated.value)
+  const sidebarOpen: Ref<boolean | null> = ref(null)
+
+  function setSidebarOpen(val: boolean) {
+    sidebarOpen.value = val
+  }
 
   function setDark(value: boolean) {
     isDark.value = value
@@ -110,5 +115,19 @@ export const useUXStore = defineStore('ux', (): UXStore => {
     drawerOpen.value = !drawerOpen.value
   }
 
-  return { isDark, setDark, toggleDark, waitForFonts, fontsReady, categories, toggleCategory, isActiveCategory, bottomed, toggleDrawer, drawerOpen, sidebarOpen }
+  return {
+    isDark,
+    setDark,
+    toggleDark,
+    waitForFonts,
+    fontsReady,
+    categories,
+    toggleCategory,
+    isActiveCategory,
+    bottomed,
+    toggleDrawer,
+    drawerOpen,
+    sidebarOpen,
+    setSidebarOpen
+  }
 })

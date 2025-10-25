@@ -95,11 +95,9 @@ watch(bottomed, (newVal) => {
 import { Button } from '@/components/ui/button'
 import { Tags } from 'lucide-vue-next'
 import Login from '@/components/Login.vue'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import Sidebar from '@/components/Sidebar.vue'
-
-import { 
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 </script>
 <template>
 <!-- todo: add authed transition -->
@@ -118,41 +116,43 @@ import {
   <!-- body -->
   <div class="relative flex-1 z-0 bg-background">
     <OnboardingProvider :steps="onboardingSteps" :auto-start="false">
-      <Sidebar>
-        <header class="px-[var(--app-sm-spacing)] h-[var(--app-header-height)] flex items-center justify-between z-0">
-          <OnboardingTooltip step-id="sidebar">
-            <!-- todo: posb race condition in :class -->
-            <SidebarTrigger :class="{ 'bg-secondary': sidebarOpen, 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
-          </OnboardingTooltip>
-          <OnboardingTooltip step-id="tags">
-            <Button
-              class="cursor-pointer text-primary scale-90"
-              :class="[drawerOpen ? 'bg-secondary' : 'bg-background']"
-              variant="ghost"
-              size="icon"
-              @click="uxStore.toggleDrawer()"
-            >
-              <Tags />
-            </Button>
-          </OnboardingTooltip>
-        </header>
+      <SidebarProvider :key="isAuthenticated + ''" class="h-full w-full select-none">
+        <Sidebar>
+          <header class="px-[var(--app-sm-spacing)] h-[var(--app-header-height)] flex items-center justify-between z-0">
+            <OnboardingTooltip step-id="sidebar">
+              <!-- todo: posb race condition in :class -->
+              <SidebarTrigger :class="{ 'bg-secondary': sidebarOpen, 'pointer-events-none text-muted-foreground!': !bottomed }" variant="ghost" class="scale-90 cursor-pointer p-4.5 text-primary"/>
+            </OnboardingTooltip>
+            <OnboardingTooltip step-id="tags">
+              <Button
+                class="cursor-pointer text-primary scale-90"
+                :class="[drawerOpen ? 'bg-secondary' : 'bg-background']"
+                variant="ghost"
+                size="icon"
+                @click="uxStore.toggleDrawer()"
+              >
+                <Tags />
+              </Button>
+            </OnboardingTooltip>
+          </header>
 
-        <router-view/>
+          <router-view/>
 
-        <!-- overlay content -->
-        <Transition name="fade" mode="out-in">
-          <div v-if="route.name === 'stack'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
-        </Transition>
+          <!-- overlay content -->
+          <Transition name="fade" mode="out-in">
+            <div v-if="route.name === 'stack'" class="absolute inset-0 z-9 bg-black/10 backdrop-blur-[1px]"></div>
+          </Transition>
 
-        <router-view
-          v-slot="{ Component }"
-          name="overlay"
-        >
-          <div v-if="Component" class="absolute inset-0 z-10">
-            <component  :is="Component" @backgroundClick="$router.push('/')" />
-          </div>
-        </router-view>
-      </Sidebar>
+          <router-view
+            v-slot="{ Component }"
+            name="overlay"
+          >
+            <div v-if="Component" class="absolute inset-0 z-10">
+              <component  :is="Component" @backgroundClick="$router.push('/')" />
+            </div>
+          </router-view>
+        </Sidebar>
+      </SidebarProvider>
     </OnboardingProvider>
   </div>
 
