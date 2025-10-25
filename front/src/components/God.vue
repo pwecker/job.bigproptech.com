@@ -56,7 +56,8 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 
     <!-- interaction -->
     <component
-      :is="flavorIcons[interactionFlavor ?? null]"
+      v-if="interactionFlavor"
+      :is="flavorIcons[interactionFlavor]"
       class="text-muted-foreground w-[1em] h-[1em]"
     />
 
