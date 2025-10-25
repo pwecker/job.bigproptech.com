@@ -151,6 +151,26 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     }
   }
 
+  function normalize(value: any, def: any): any {
+    switch (def.type) {
+      case 'string':
+      case 'text':
+        return value != null ? String(value) : '';
+      case 'decimal':
+        return typeof value === 'string' ? parseFloat(value) : value;
+      case 'boolean':
+        if (typeof value === 'string') return value.toLowerCase() === 'true';
+        return !!value;
+      case 'json':
+        if (typeof value === 'string') {
+          try { return JSON.parse(value); } catch { return {}; }
+        }
+        return value;
+      default:
+        return value;
+    }
+  }
+
   async function createOrUpdateByMapping(documentId: string, map: SyncMap, mongoDoc: any) {
     const { collection, key, fields } = map;
     
@@ -158,8 +178,11 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     const schema = strapi.contentTypes[map.collection.target];
 
     for (const [strapiField, mapping] of Object.entries(fields)) {
-      const syncData = resolveMappingWithFormat(mapping, mongoDoc);
-      if (validate(syncData, schema.attributes[strapiField])) mappedData[strapiField] = syncData;
+      const rawValue = resolveMappingWithFormat(mapping, mongoDoc);
+      const fieldDef = schema.attributes[strapiField];
+      const normalized = normalize(rawValue, fieldDef);
+      const isValid = validate(normalized, fieldDef)
+      if (isValid) mappedData[strapiField] = normalized;
       else delete mappedData[strapiField];
     }
 
@@ -173,13 +196,18 @@ const syncService = ({ strapi }: { strapi: Core.Strapi }): SyncService => {
     }
   
     const { target } = collection;
-  
+
     try {
       const existing = await strapi.documents(collection.target).findFirst({
         filters: uniqueFilters
       });
+
+      console.log({
+        filters: uniqueFilters
+      })
   
       if (existing) {
+        
         return await strapi.documents(target).update({
           documentId: existing.documentId,
           data: mappedData,
