@@ -30,7 +30,6 @@ const forceLogin = computed(() => {
   return fullTeased.value && !isAuthenticated.value
 })
 
-
 // site flow
 import { nextTick } from 'vue'
 import { useUXStore } from '@/stores/ux'
@@ -92,6 +91,12 @@ watch(bottomed, (newVal) => {
   })
 })
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const handleBgClick = (): void => {
+  router.push('/')
+}
+
 // components
 import { Button } from '@/components/ui/button'
 import { Tags } from 'lucide-vue-next'
@@ -150,7 +155,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
             name="overlay"
           >
             <div v-if="Component" class="absolute inset-0 z-10">
-              <component  :is="Component" @backgroundClick="$router.push('/')" />
+              <component  :is="Component" @backgroundClick="handleBgClick" />
             </div>
           </router-view>
         </Sidebar>

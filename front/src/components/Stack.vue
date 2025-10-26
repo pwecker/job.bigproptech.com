@@ -67,10 +67,11 @@ const handleInteraction = (payload: { documentId: string, jobTitle: string, flav
     forceLogin.value = true
     const intendedRoute = {
       ...route,
-      fullPath: `/${stack.value[1]}`,
-      path: `/${stack.value[1]}`,
-      params: { key: stack.value[1] }
+      fullPath: `/${nextUp}`,
+      path: `/${nextUp}`,
+      params: { key: nextUp }
     } as RouteLocationNormalized
+
     authStore.setIntendedRoute(intendedRoute)
   }
 
@@ -226,6 +227,7 @@ import { watchOnce } from '@vueuse/core'
               class="h-full absolute inset-0 bg-background overflow-hidden"
               :style="`--delay-leave: ${0}s; --delay-enter: ${0.125}s`"
               :class="[forceLoginPrompt ? 'border-1 border-accent' : '']"
+              @click.stop=""
             >
               <Login v-if="forceLoginPrompt" />
               <DataDetail v-else :documentId="stack[0]" @interaction="handleInteraction"/>
