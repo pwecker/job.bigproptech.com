@@ -25,6 +25,15 @@ export enum Quantifiers {
   Suggested = 'suggested'
 }
 
+export type QuantifierKey = Quantifiers | 'null'
+
+export const QUANTIFIER_LABELS: Record<QuantifierKey, string> = {
+  [Quantifiers.Required]: 'Required',
+  [Quantifiers.Preferred]: 'Preferred',
+  [Quantifiers.Suggested]: 'Suggested',
+  null: 'Unspecified'
+}
+
 type CategoryColors = Record<Categories, string>
 export const categoryColors: CategoryColors = {
   [Categories.ProgrammingLanguage]: 'bg-indigo-400 dark:bg-indigo-300',
@@ -55,7 +64,9 @@ export interface CategoryValue {
   quantifier: Quantifiers | null
 }
 
-export type CategorySet = Record<Categories, CategoryValue[]>
+export type CategorySet = Partial<Record<Categories, CategoryValue[]>>
+
+export type GroupedByQuantifier = Record<QuantifierKey, CategorySet>
 
 export interface TagsDataReturn {
   data: Ref<GroupedTags | null>
@@ -76,4 +87,12 @@ export function getTagData(documentId: string, authHeaders?: () => Record<string
   )
 
   return resource.getOne(documentId)
+}
+
+export function isValidQuantifierKey(key: string): key is QuantifierKey {
+  return key === 'null' || Object.values(Quantifiers).includes(key as Quantifiers)
+}
+
+export function isValidCategory(category: string): category is Categories {
+  return Object.values(Categories).includes(category as Categories)
 }

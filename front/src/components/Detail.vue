@@ -53,22 +53,21 @@ const benefits = computed(() => {
 
 // use categories
 import { type Tag } from '@/composables/useFullApi'
-import { Categories, Quantifiers, type CategorySet, type CategoryValue, categoryColors } from '@/composables/useTagApi'
+import {
+  Categories,
+  Quantifiers,
+  type CategorySet,
+  type CategoryValue,
+  type QuantifierKey,
+  type GroupedByQuantifier,
+  categoryColors
+  ,
+  QUANTIFIER_LABELS,
+  isValidQuantifierKey,
+  isValidCategory
+} from '@/composables/useTagApi'
 
-type QuantifierKey = `${Quantifiers}` | 'null'
-
-interface GroupedByQuantifier {
-  [key: string]: Partial<Record<Categories, CategoryValue[]>>
-}
-
-const quantifierLabels: Record<QuantifierKey, string> = {
-  required: 'Required',
-  preferred: 'Preferred',
-  suggested: 'Suggested',
-  null: 'Unspecified'
-}
-
-const categories = computed(() => {
+const categories = computed<GroupedByQuantifier | null>(() => {
   if (!data.value) return null
   const tags: Tag[] | undefined = data.value.tags
   if (!tags) return null
@@ -90,6 +89,22 @@ const categories = computed(() => {
     return acc
   }, {} as GroupedByQuantifier)
 })
+
+const displayCategories = computed(() => {
+  if (!categories.value) return null
+  const { null: nullQuant, ...rest } = categories.value
+  return rest as Partial<Record<Quantifiers, CategorySet>>
+})
+
+const getQuantifierLabel = (key: string | number): string => {
+  const strKey = String(key) as QuantifierKey
+  return QUANTIFIER_LABELS[strKey] || String(key)
+}
+
+const getCategoryColor = (key: string | number): string => {
+  const strKey = String(key) as Categories
+  return categoryColors[strKey] || ''
+}
 
 // interaction
 import { type InteractionFlavor } from '@/stores/interaction'
@@ -167,37 +182,41 @@ import Separator from '@/components/ui/separator/Separator.vue'
 
       <!-- categories -->
       <div
-        v-if="categories"
+        v-if="displayCategories"
         class="flex flex-col md:flex-row uppercase tracking-wide gap-[var(--app-sm-spacing)] md:gap-none"
       >
-        <template v-for="(categoriesByQuant, qKey) in categories">
-          <div
-            :key="qKey"
-            v-if="qKey as QuantifierKey !== 'null'"
-            class="flex flex-col basis-1/3 grow-1"
-          >
-            <legend class="w-full">
-              <Badge variant="outline" class="border-border my-[var(--app-sm-spacing)] md:my-[var(--app-xs-spacing)]" :class="[qKey as QuantifierKey === 'required' ? 'text-primary' : 'text-muted-foreground']">{{ quantifierLabels[qKey as QuantifierKey] }}</Badge>
-            </legend>
+      <template v-for="(categoriesByQuant, qKeyRaw) in displayCategories" :key="qKeyRaw">
+        <div
+          v-if="String(qKeyRaw) !== 'null'"
+          class="flex flex-col basis-1/3 grow-1"
+        >
+          <legend class="w-full">
+            <Badge 
+              variant="outline" 
+              class="border-border my-[var(--app-sm-spacing)] md:my-[var(--app-xs-spacing)]" 
+              :class="[qKeyRaw === Quantifiers.Required ? 'text-primary' : 'text-muted-foreground']"
+            >
+            {{ getQuantifierLabel(qKeyRaw) }}
+          </Badge>
+          </legend>
+          <template v-for="(items, categoryRaw) in categoriesByQuant" :key="categoryRaw">
+            <div class="flex items-center flex-wrap pl-[var(--app-xs-spacing)]">
+              <div
+                class="w-1.5 h-1.5 rounded-sm mr-[var(--app-xs-spacing)]"
+                :class="[getCategoryColor(categoryRaw)]"
+              ></div>
 
-            <template v-for="(items, categoryName) in categoriesByQuant" :key="categoryName">
-              <div class="flex items-center flex-wrap pl-[var(--app-xs-spacing)]">
-                <div
-                  class="w-1.5 h-1.5 rounded-sm mr-[var(--app-xs-spacing)]"
-                  :class="[categoryColors[categoryName as Categories]]"
-                ></div>
-
-                <div class="font-semibold mr-[var(--app-xs-spacing)] text-muted-foreground">{{ categoryName }}:</div>
-                <div class="truncate flex-1">
-                  <template v-if="items" v-for="(item, index) in items" :key="index">
-                    <span
-                      :class="[item.quantifier === Quantifiers.Required ? 'underline' : '']"
-                    >
-                      {{ item.val }}
-                    </span>
-                    <span v-if="index < items.length - 1" class="mr-[var(--app-xs-spacing)]">,</span>
-                  
-                  </template>
+              <div class="font-semibold mr-[var(--app-xs-spacing)] text-muted-foreground">{{ categoryRaw }}:</div>
+              <div class="truncate flex-1">
+                <template v-if="items" v-for="(item, index) in items" :key="index">
+                  <span
+                    :class="[item.quantifier === Quantifiers.Required ? 'underline' : '']"
+                  >
+                    {{ item.val }}
+                  </span>
+                  <span v-if="index < items.length - 1" class="mr-[var(--app-xs-spacing)]">,</span>
+                
+                </template>
               </div>
             </div>
             </template>
@@ -232,7 +251,7 @@ import Separator from '@/components/ui/separator/Separator.vue'
         <template v-if="benefits">
           <Separator class="my-[var(--app-md-spacing)]"></Separator>
           <p class="text-muted-foreground my-[var(--app-sm-spacing)] md:my-[var(--app-xs-spacing)]">Benefits</p>
-          <span v-for="(highlight, section) of data?.job_highlights">
+          <span v-for="(highlight, section) of data?.job_benefits">
             <p v-html="highlight"></p>
           </span>
         </template>
