@@ -123,7 +123,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
   <!-- body -->
   <div class="relative flex-1 z-0 bg-background">
     <OnboardingProvider :steps="onboardingSteps" :auto-start="false">
-      <SidebarProvider :key="isAuthenticated + ''" class="h-full w-full select-none">
+      <SidebarProvider :defaultOpen="isAuthenticated" :key="isAuthenticated + ''" class="h-full w-full select-none">
         <Sidebar>
           <header class="px-[var(--app-sm-spacing)] h-[var(--app-header-height)] flex items-center justify-between z-0">
             <OnboardingTooltip step-id="sidebar">
