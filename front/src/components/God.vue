@@ -83,7 +83,7 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
     <!-- categories -->
     <span class="gap-x-1 font-light dark:font-light flex items-center" v-for="(group, name) in params.value?.categories as CategorySet">
       <div class="category-color-dot w-1.5 h-1.5 rounded-sm mx-0.5" :class="[categoryColors[name as Categories]]"></div>
-      <template v-for="(item, index) in group" :key="index">
+      <template v-if="group" v-for="(item, index) in group" :key="index">
         <span
           class="uppercase tracking-wide whitespace-nowrap"
           :class="[
